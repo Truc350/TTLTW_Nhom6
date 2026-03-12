@@ -1,0 +1,62 @@
+.voucher-card {
+    height: 200px;
+    width: 300px;
+}
+
+.voucher-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+.voucher-group h1 {
+    margin: 100px 0 70px 0;
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 4px 4px 4px #551010;
+}
+
+.container {
+    background-color:#dc2e2e;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 100px;
+}
+
+.voucher-time {
+    display: flex;
+    flex-wrap: wrap;
+    width: 1000px;
+    justify-content: center;
+}
+
+.voucher-ship {
+    display: flex;
+    flex-wrap: wrap;
+    width: 1000px;
+    justify-content: center;
+}
+
+.voucher-other {
+    display: flex;
+    flex-wrap: wrap;
+    width: 1000px;
+    justify-content: center;
+}
+
+.voucher-card {
+    margin: 10px;
+}
+.voucher-popup {
+    background: rgba(0, 0, 0, 0.5);
+}
+.voucher-popup-content{
+    position: fixed;
+    top: calc(50% - 100px);
+    left: calc(50% - 160px);
+}

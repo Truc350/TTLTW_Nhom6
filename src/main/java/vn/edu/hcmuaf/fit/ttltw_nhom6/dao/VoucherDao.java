@@ -1,0 +1,51 @@
+package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
+
+import org.jdbi.v3.core.Jdbi;
+import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ltw_nhom5.model.Voucher;
+
+import java.util.List;
+
+public class VoucherDao {
+    private final Jdbi jdbi;
+
+
+    public VoucherDao() {
+        this.jdbi = JdbiConnector.get();
+    }
+
+    public boolean addVoucher(Voucher voucher) {
+        String sql ="insert into vouchers (code, discount_type, discount_value, discount_target, " +
+                " apply_scope, quantity, start_date, end_date, min_order_amount, is_single_use, used_count)" +
+                " values ( :code, :discount_type, :discount_value, :discount_target, :apply_scope, :quantity, " +
+                " :start_date, :end_date, :min_order_amount, :is_single_use, :used_count)";
+
+
+        return jdbi.withHandle(handle ->
+                handle.createUpdate(sql)
+                    .bind("code", voucher.getCode())
+                    .bind("discount_type", voucher.getDiscountType())
+                    .bind("discount_value", voucher.getDiscountValue())
+                    .bind("discount_target", voucher.getDiscountTarget())
+                    .bind("apply_scope", voucher.getApplyScope())
+                    .bind("quantity", voucher.getQuantity())
+                    .bind("start_date", voucher.getStartDate())
+                    .bind("end_date", voucher.getEndDate())
+                    .bind("min_order_amount", voucher.getMinOrderAmount())
+                    .bind("is_single_use", voucher.isSingleUse())
+                    .bind("used_count", voucher.getUsedCount())
+                        .execute() >0
+        );
+
+
+    }
+
+    public List<Voucher> getAllVouchers() {
+        String sql = "select * from vouchers order by id desc";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(Voucher.class)
+                        .list()
+                );
+    }
+}

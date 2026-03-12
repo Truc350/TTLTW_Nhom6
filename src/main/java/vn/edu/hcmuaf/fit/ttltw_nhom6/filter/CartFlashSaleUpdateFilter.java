@@ -4,10 +4,10 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.FlashSaleComicsDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.FlashSaleDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Cart;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.CartItem;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Cart;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
 
 import java.io.IOException;
 import java.util.Map;

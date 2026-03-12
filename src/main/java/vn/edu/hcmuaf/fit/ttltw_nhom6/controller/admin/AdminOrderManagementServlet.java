@@ -6,9 +6,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.edu.hcmuaf.fit.ltw_nhom5.service.NotificationService;
-import vn.edu.hcmuaf.fit.ltw_nhom5.service.OrderService;
-import vn.edu.hcmuaf.fit.ltw_nhom5.utils.gson.GsonConfig;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.NotificationService;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.OrderService;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.gson.GsonConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;

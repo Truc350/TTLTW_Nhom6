@@ -5,8 +5,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.VoucherDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Voucher;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.VoucherDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 
 import java.io.IOException;
 import java.math.BigDecimal;

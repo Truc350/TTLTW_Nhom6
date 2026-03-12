@@ -1,8 +1,8 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.OrderHistory;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.OrderHistory;
 
 import java.util.Optional;
 

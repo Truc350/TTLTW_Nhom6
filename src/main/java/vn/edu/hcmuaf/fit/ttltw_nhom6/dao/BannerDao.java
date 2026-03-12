@@ -1,7 +1,7 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Banner;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Banner;
 
 import java.sql.Timestamp;
 import java.util.List;

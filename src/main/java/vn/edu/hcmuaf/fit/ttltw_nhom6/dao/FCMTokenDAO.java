@@ -1,6 +1,6 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
 
 public class FCMTokenDAO {
     private static FCMTokenDAO instance;

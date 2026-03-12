@@ -1,9 +1,9 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.OrderDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.OrderHistoryDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.UserDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.OrderDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.OrderHistoryDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.util.Optional;
 

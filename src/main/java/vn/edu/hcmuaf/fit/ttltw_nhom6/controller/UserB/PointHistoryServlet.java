@@ -5,11 +5,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.PointTransactionDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.UserDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.PointTransaction;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.PointTransactionDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.PointTransaction;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.IOException;
 import java.util.List;

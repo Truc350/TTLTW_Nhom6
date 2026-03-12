@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.ComicDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.OrderDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.*;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ComicDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.OrderDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.*;
 
 import java.io.IOException;
 import java.util.HashMap;

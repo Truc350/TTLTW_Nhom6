@@ -7,10 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.json.JSONObject;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.UserDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Cart;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Cart;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;

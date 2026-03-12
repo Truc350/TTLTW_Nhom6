@@ -9,10 +9,7 @@ import java.util.Properties;
 
 public class
 JdbiConnector {
-
     private static Jdbi jdbi;
-
-
     public static Jdbi get() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -68,7 +65,6 @@ JdbiConnector {
     }
 
     public static void main(String[] args) {
-//        System.out.println(">>> RUNNING JdbiConnector MAIN <<<");
         System.out.println("Host: " + DBProperties.host());
         System.out.println("Port: " + DBProperties.port());
         System.out.println("Database: " + DBProperties.database());
@@ -76,8 +72,5 @@ JdbiConnector {
         System.out.println("Password: " + DBProperties.password());
         Jdbi jdbi = get();
         System.out.println("Kết nối DB OK: " + jdbi);
-
-
-
     }
 }

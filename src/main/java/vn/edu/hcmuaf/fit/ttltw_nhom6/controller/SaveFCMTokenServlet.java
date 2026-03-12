@@ -7,8 +7,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.NotificationDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.NotificationDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;

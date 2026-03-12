@@ -12,8 +12,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.UserDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.IOException;
 import java.net.URLEncoder;

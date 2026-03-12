@@ -6,12 +6,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.FlashSaleComicsDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Cart;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.CartItem;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Comic;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
-import vn.edu.hcmuaf.fit.ltw_nhom5.service.ComicService;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Cart;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.ComicService;
 
 import java.io.IOException;
 import java.util.ArrayList;

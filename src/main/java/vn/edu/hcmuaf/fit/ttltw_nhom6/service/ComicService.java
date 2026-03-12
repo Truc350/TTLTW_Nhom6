@@ -1,4 +1,4 @@
-// src/main/java/vn/edu/hcmuaf/fit/ltw_nhom5/service/ComicService.java
+// src/main/java/vn/edu/hcmuaf/fit/ttltw_nhom6/service/ComicService.java
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
 import org.jdbi.v3.core.Jdbi;

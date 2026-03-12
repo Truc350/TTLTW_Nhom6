@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.model.Category" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category" %>
 <%@ page import="java.util.List" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.dao.CategoriesDao" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.model.User" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CategoriesDao" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.User" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <header class="navbar">

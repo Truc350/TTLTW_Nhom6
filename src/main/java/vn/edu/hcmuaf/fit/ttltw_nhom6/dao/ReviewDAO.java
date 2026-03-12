@@ -1,9 +1,9 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Review;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.ReviewImage;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Review;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.ReviewImage;
 
 import java.util.HashMap;
 import java.util.List;

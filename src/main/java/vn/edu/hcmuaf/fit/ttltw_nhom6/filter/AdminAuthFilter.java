@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.IOException;
 

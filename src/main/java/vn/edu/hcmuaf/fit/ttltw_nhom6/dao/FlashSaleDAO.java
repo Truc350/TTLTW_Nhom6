@@ -1,6 +1,6 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.FlashSale;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.FlashSale;
 
 import java.time.LocalDateTime;
 import java.util.List;

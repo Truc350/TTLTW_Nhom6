@@ -1,7 +1,7 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.PointTransaction;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.PointTransaction;
 
 import java.time.LocalDateTime;
 import java.util.List;

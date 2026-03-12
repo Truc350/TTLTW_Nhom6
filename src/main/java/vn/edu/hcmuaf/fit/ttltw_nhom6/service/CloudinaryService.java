@@ -3,7 +3,7 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.Part;
-import vn.edu.hcmuaf.fit.ltw_nhom5.config.CloudinaryConfig;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.config.CloudinaryConfig;
 
 import java.io.IOException;
 import java.util.Map;

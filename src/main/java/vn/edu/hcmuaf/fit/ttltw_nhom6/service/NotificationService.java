@@ -1,7 +1,7 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.NotificationDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Notification;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.NotificationDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Notification;
 
 
 public class NotificationService {

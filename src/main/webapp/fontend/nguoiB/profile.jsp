@@ -1,8 +1,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.dao.WishlistDAO" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.model.Comic" %>
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.model.User" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.dao.WishlistDAO" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.User" %>
 <%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">

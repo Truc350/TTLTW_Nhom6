@@ -1,7 +1,7 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.ComicDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Comic;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ComicDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 
 import java.util.HashMap;
 import java.util.List;

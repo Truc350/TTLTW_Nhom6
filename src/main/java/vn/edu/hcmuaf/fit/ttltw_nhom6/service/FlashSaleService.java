@@ -1,7 +1,7 @@
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.FlashSaleComicsDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.FlashSaleDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleDAO;
 
 import java.util.List;
 import java.util.Map;

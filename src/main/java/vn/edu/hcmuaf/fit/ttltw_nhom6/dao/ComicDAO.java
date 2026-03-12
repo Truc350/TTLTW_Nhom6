@@ -2,10 +2,10 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Comic;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.ComicImage;
-import vn.edu.hcmuaf.fit.ltw_nhom5.utils.TextUtils;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.ComicImage;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.TextUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;

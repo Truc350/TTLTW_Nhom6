@@ -1,15 +1,15 @@
-// src/main/java/vn/edu/hcmuaf/fit/ltw_nhom5/service/ComicService.java
+// src/main/java/vn/edu/hcmuaf/fit/ttltw_nhom6/service/ComicService.java
 package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 
 import org.jdbi.v3.core.Jdbi;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.CategoriesDao;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.ComicDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.ReviewDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.dao.SeriesDAO;
-import vn.edu.hcmuaf.fit.ltw_nhom5.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Comic;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.ComicImage;
-import vn.edu.hcmuaf.fit.ltw_nhom5.model.Review;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CategoriesDao;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ComicDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ReviewDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.SeriesDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.ComicImage;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Review;
 
 import java.util.List;
 

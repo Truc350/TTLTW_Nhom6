@@ -1,4 +1,4 @@
-<%@ page import="vn.edu.hcmuaf.fit.ltw_nhom5.model.PointTransaction" %>
+<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.PointTransaction" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>

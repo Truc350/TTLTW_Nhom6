@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<jsp:useBean id="categoryDAO" class="vn.edu.hcmuaf.fit.ltw_nhom5.dao.CategoriesDao"/>
-<jsp:useBean id="seriesDAO" class="vn.edu.hcmuaf.fit.ltw_nhom5.dao.SeriesDAO"/>
+<jsp:useBean id="categoryDAO" class="vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CategoriesDao"/>
+<jsp:useBean id="seriesDAO" class="vn.edu.hcmuaf.fit.ttltw_nhom6.dao.SeriesDAO"/>
 <c:set var="categories" value="${categoryDAO.allCategories}"/>
 <c:set var="seriesList" value="${seriesDAO.allSeries}"/>
 

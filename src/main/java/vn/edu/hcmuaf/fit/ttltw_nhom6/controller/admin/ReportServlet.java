@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ReportDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleDAO;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -18,12 +19,14 @@ import java.util.Map;
 @WebServlet(name = "ReportServlet", urlPatterns = {"/admin/ReportManagement", "/admin/report-data"})
 public class ReportServlet extends HttpServlet {
     private ReportDAO reportDAO;
+    private FlashSaleDAO flashSaleDAO;
     private Gson gson;
 
     @Override
     public void init() throws ServletException {
         super.init();
         reportDAO = new ReportDAO();
+        flashSaleDAO = new FlashSaleDAO();
         gson = new Gson();
     }
 
@@ -34,13 +37,11 @@ public class ReportServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if ("/admin/ReportManagement".equals(path)) {
-            System.out.println("📄 Forwarding to report.jsp");
             request.getRequestDispatcher("/fontend/admin/report.jsp").forward(request, response);
             return;
         }
 
         if ("/admin/report-data".equals(path)) {
-            System.out.println("📊 Handling report-data JSON request");
             handleReportData(request, response);
             return;
         }
@@ -68,8 +69,11 @@ public class ReportServlet extends HttpServlet {
         } else if ("month".equals(filter)) {
             startDate = LocalDate.now().minusDays(29);
             endDate = LocalDate.now();
+        }
+        else if ("year".equals(filter)) {
+            startDate = LocalDate.now().withDayOfYear(1);
+            endDate = LocalDate.now();
         } else {
-
             startDate = LocalDate.now();
             endDate = LocalDate.now();
         }
@@ -83,7 +87,15 @@ public class ReportServlet extends HttpServlet {
             List<Map<String, Object>> topProducts = reportDAO.getTopSellingProducts(startDate, endDate, 3);
             result.put("topProducts", topProducts);
 
-            List<Map<String, Object>> dailyData = reportDAO.getDailyRevenue(startDate, endDate);
+            List<Map<String, Object>> dailyData;
+            boolean isYearFilter = "year".equals(filter);
+
+            if (isYearFilter) {
+                dailyData = reportDAO.getMonthlyRevenue(startDate, endDate);
+            } else {
+                dailyData = reportDAO.getDailyRevenue(startDate, endDate);
+            }
+
 
             Map<String, Object> chartData = new HashMap<>();
 
@@ -93,7 +105,14 @@ public class ReportServlet extends HttpServlet {
             List<Double> avgValueData = new ArrayList<>();
 
             for (Map<String, Object> day : dailyData) {
-                String dateStr = day.get("date").toString();
+                String dateStr;
+                if (isYearFilter) {
+                    // Hiện "Tháng 1", "Tháng 2"...
+                    int month = ((Number) day.get("month")).intValue();
+                    dateStr = "Tháng " + month;
+                } else {
+                    dateStr = day.get("date").toString();
+                }
                 labels.add(dateStr);
 
                 Double revenue = day.get("revenue") != null ?
@@ -124,6 +143,9 @@ public class ReportServlet extends HttpServlet {
             chartData.put("avgValue", avgValueChart);
 
             result.put("chartData", chartData);
+
+            List<Map<String, Object>> flashSaleStats = reportDAO.getFlashSaleTopRevenue(5);
+            result.put("flashSales", flashSaleStats);
 
             String jsonResponse = gson.toJson(result);
 

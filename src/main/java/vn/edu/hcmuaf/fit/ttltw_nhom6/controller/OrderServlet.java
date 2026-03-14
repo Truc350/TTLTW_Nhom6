@@ -222,6 +222,7 @@ public class OrderServlet extends HttpServlet {
                 orderItem.setComicId(item.getComic().getId());
                 orderItem.setQuantity(item.getQuantity());
                 orderItem.setPriceAtPurchase(item.getFinalPrice());
+                orderItem.setFlashSaleId(item.getFlashSaleId());
                 orderItems.add(orderItem);
             }
 

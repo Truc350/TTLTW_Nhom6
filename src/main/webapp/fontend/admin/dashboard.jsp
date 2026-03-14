@@ -15,7 +15,7 @@
 <div class="container">
     <jsp:include page="/fontend/admin/ASide.jsp"/>
     <div class="main-content">
-        <jsp:include page="/fontend/admin/HeaderAdmin.jsp"/>
+        <%@ include file="HeaderAdmin.jsp" %>
         <div class="dashboard">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>Tổng quan cửa hàng</h2>

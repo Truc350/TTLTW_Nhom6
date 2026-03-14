@@ -14,10 +14,8 @@
     <jsp:include page="/fontend/admin/ASide.jsp"/>
     <div class="main-content">
         <%@ include file="HeaderAdmin.jsp" %>
+        <h2 class="page-title">Thống kê</h2>
         <div class="report-wrapper">
-            <h2 class="page-title">
-                Thống kê
-            </h2>
             <div class="filter-time">
                 <button class="time-btn active" data-filter="today">Hôm nay</button>
                 <button class="time-btn" data-filter="week">Tuần này</button>

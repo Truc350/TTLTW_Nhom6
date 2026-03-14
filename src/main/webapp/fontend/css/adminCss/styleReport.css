@@ -13,23 +13,22 @@ body {
 .container {
     display: flex;
     height: 100vh;
+    /*overflow: hidden;*/
 }
 
 .main-content {
     flex: 1;
-    padding: 0;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
+    padding: 30px;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 .report-wrapper {
-    padding: 30px;
     flex: 1;
 }
 
 .main-content > *:not(.report-wrapper) {
-    flex-shrink: 0; /* Header không co lại */
+    flex-shrink: 0;
 }
 .page-title {
     font-size: 24px;

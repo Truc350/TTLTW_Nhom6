@@ -77,35 +77,6 @@
                     </tr>
                 </c:forEach>
 
-
-<%--                <tr>--%>
-<%--                    <td>NEWUSER10</td>--%>
-<%--                    <td>10%</td>--%>
-<%--                    <td>Vận chuyển</td>--%>
-<%--                    <td>54/100</td>--%>
-<%--                    <td>0đ</td>--%>
-<%--                    <td>01/02/2026</td>--%>
-<%--                    <td><span class="status-active">Đang chạy</span></td>--%>
-<%--                    <td>--%>
-<%--                        <button class="edit-btn" onclick="openEdit('NEWUSER10')"><i class="fa-solid fa-pen-to-square"></i></button>--%>
-<%--                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>--%>
-<%--                    </td>--%>
-<%--                </tr>--%>
-
-<%--                <tr>--%>
-<%--                    <td>SIEUSALE15</td>--%>
-<%--                    <td>15%</td>--%>
-<%--                    <td>Giảm giá</td>--%>
-<%--                    <td>0/50</td>--%>
-<%--                    <td>50.000đ</td>--%>
-<%--                    <td>08/10/2025</td>--%>
-<%--                    <td><span class="status-out">Hết lượt</span></td>--%>
-<%--                    <td>--%>
-<%--                        <button class="edit-btn" onclick="openEdit('SIEUSALE15')"><i class="fa-solid fa-pen-to-square"></i></button>--%>
-<%--                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>--%>
-<%--                    </td>--%>
-<%--                </tr>--%>
-
                 <!-- Phân trang -->
                 <tr class="pagination-row">
                     <td colspan="10">
@@ -181,7 +152,7 @@
                 <!-- Chọn thể loại (ẩn mặc định) -->
                 <div id="addCategoryBox" style="grid-column: 1 / -1;">
                     <label>Thể loại</label>
-                    <select id="addCategory" disabled>
+                    <select id="addCategory" name="cate" disabled>
                         <option value="">-- Chọn thể loại --</option>
                         <option>Trinh thám</option>
                         <option>Hài hước</option>

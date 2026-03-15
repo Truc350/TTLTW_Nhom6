@@ -35,11 +35,18 @@ public class VoucherServlet extends HttpServlet {
         BigDecimal min_order_amount = new BigDecimal(request.getParameter("min_order_amount"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         String scope =   request.getParameter("apply_scope");
-        boolean is_single_use =Boolean.parseBoolean(request.getParameter("is_single_use"));
+
+        boolean is_single_use =request.getParameter("is_single_use") != null;
+        System.out.println("is_single_use: "+is_single_use);
         LocalDateTime start_date =LocalDateTime.parse(request.getParameter("start_date"));
         LocalDateTime end_date =LocalDateTime.parse(request.getParameter("end_date"));
 
         int used_count =0;
+
+        String category = request.getParameter("cate");
+        if (!scope.equalsIgnoreCase("all")) {
+            scope = category;
+        }
 
         Voucher voucher = new Voucher(code, type, used_count, value, target,  scope, quantity,
                                         start_date, end_date, min_order_amount,is_single_use);

@@ -4,6 +4,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.FlashSale;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class FlashSaleDAO extends ADao {
     public FlashSale getActiveFlashSaleEndingSoon() {
@@ -13,6 +14,7 @@ public class FlashSaleDAO extends ADao {
                     WHERE status = 'active'
                       AND start_time <= NOW()
                       AND end_time >= NOW()
+                      AND is_deleted = 0
                     ORDER BY end_time ASC
                     LIMIT 1
                 """;
@@ -48,6 +50,7 @@ public class FlashSaleDAO extends ADao {
         String sql = """
                     SELECT id, name, discount_percent, start_time, end_time, status, created_at
                     FROM FlashSale
+                    WHERE is_deleted = 0
                     ORDER BY created_at ASC
                 """;
 
@@ -59,20 +62,11 @@ public class FlashSaleDAO extends ADao {
     }
 
     public boolean deleteById(int id) {
-        String sql = "DELETE FROM FlashSale WHERE id = ?";
+        String sql = "UPDATE FlashSale SET is_deleted = 1 WHERE id = ?";
 
-        String deleteLinksSql = "DELETE FROM FlashSale_Comics WHERE flashsale_id = ?";
-
-        return jdbi.withHandle(handle -> {
-            handle.createUpdate(deleteLinksSql)
-                    .bind(0, id)
-                    .execute();
-
-            int rows = handle.createUpdate(sql)
-                    .bind(0, id)
-                    .execute();
-            return rows > 0;
-        });
+        return jdbi.withHandle(handle ->
+            handle.createUpdate(sql).bind(0, id).execute() > 0
+        );
     }
 
     public FlashSale getById(int id) {
@@ -139,7 +133,8 @@ public class FlashSaleDAO extends ADao {
         String sql = """
                     SELECT *
                     FROM FlashSale
-                    WHERE status IN ('active', 'scheduled')
+                    WHERE status IN ('active', 'scheduled') 
+                    AND is_deleted = 0
                     ORDER BY start_time ASC
                 """;
 
@@ -160,6 +155,7 @@ public class FlashSaleDAO extends ADao {
         SELECT *
         FROM FlashSale
         WHERE status = :status
+        AND is_deleted = 0
         ORDER BY start_time ASC
     """;
 
@@ -168,6 +164,34 @@ public class FlashSaleDAO extends ADao {
                         .bind("status", status)
                         .mapToBean(FlashSale.class)
                         .list()
+        );
+    }
+
+    public List<Map<String, Object>> getFlashSaleStatistics() {
+        updateStatuses();
+
+        String sql = """
+        SELECT 
+            fs.id,
+            fs.name,
+            fs.start_time,
+            fs.end_time,
+            fs.discount_percent,
+            fs.status,
+            COUNT(DISTINCT o.id)                              AS total_orders,
+            COALESCE(SUM(oi.quantity), 0)                    AS total_items_sold,
+            COALESCE(SUM(oi.quantity * oi.price_at_purchase), 0) AS total_revenue
+        FROM FlashSale fs
+        LEFT JOIN order_items oi ON oi.flashsale_id = fs.id
+        LEFT JOIN orders o ON o.id = oi.order_id
+            AND o.status NOT IN ('Cancelled', 'Returned')
+        GROUP BY fs.id, fs.name, fs.start_time, fs.end_time, 
+                 fs.discount_percent, fs.status
+        ORDER BY fs.start_time DESC
+    """;
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql).mapToMap().list()
         );
     }
 }

@@ -11,6 +11,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @WebServlet("/admin/vouchers")
 public class VoucherServlet extends HttpServlet {
@@ -35,19 +36,40 @@ public class VoucherServlet extends HttpServlet {
         BigDecimal min_order_amount = new BigDecimal(request.getParameter("min_order_amount"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         String scope =   request.getParameter("apply_scope");
-        boolean is_single_use =Boolean.parseBoolean(request.getParameter("is_single_use"));
+
+        boolean is_single_use =request.getParameter("is_single_use") != null;
         LocalDateTime start_date =LocalDateTime.parse(request.getParameter("start_date"));
         LocalDateTime end_date =LocalDateTime.parse(request.getParameter("end_date"));
 
         int used_count =0;
 
-        Voucher voucher = new Voucher(code, type, used_count, value, target,  scope, quantity,
-                                        start_date, end_date, min_order_amount,is_single_use);
-        boolean isSuccess = voucherDao.addVoucher(voucher);
-        if (isSuccess) {
-            System.out.println("Successfully added voucher");
+        String category = request.getParameter("cate");
+        if (!scope.equalsIgnoreCase("all")) {
+            scope = category;
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/vouchersManagement");
+        if(voucherDao.isExistCode(code)){
+            request.setAttribute("message","Mã này đã tồn tại!");
+            List<Voucher> allVouchers = voucherDao.getAllVouchers();
+            request.setAttribute("allVouchers", allVouchers);
+            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+           return;
+        }
+
+        Voucher voucher = new Voucher(code, type, used_count, value, target,  scope, quantity,
+                                        start_date, end_date, min_order_amount,is_single_use);
+
+        if(voucherDao.addVoucher(voucher)){
+            request.setAttribute("message","Tạo thành công!");
+            request.setAttribute("allVouchers", voucherDao.getAllVouchers());
+            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+        }
+
+//        boolean isSuccess = voucherDao.addVoucher(voucher);
+//        if (isSuccess) {
+//            System.out.println("Successfully added voucher");
+//        }
+//
+//        response.sendRedirect(request.getContextPath() + "/admin/vouchersManagement");
     }
 }

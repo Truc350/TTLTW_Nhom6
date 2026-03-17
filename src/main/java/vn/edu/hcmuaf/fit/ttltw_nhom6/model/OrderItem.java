@@ -11,6 +11,8 @@ public class OrderItem {
     private int quantity;
     @ColumnName("price_at_purchase")
     private double priceAtPurchase;
+    @ColumnName("flashsale_id")
+    private Integer flashSaleId;
 
     public OrderItem() {
     }
@@ -54,4 +56,13 @@ public class OrderItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public Integer getFlashSaleId() {
+        return flashSaleId;
+    }
+
+    public void setFlashSaleId(Integer flashSaleId) {
+        this.flashSaleId = flashSaleId;
+    }
+
 }

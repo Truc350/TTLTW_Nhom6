@@ -72,8 +72,8 @@ public class OrderDAO extends ADao {
 
             if (orderItems != null && !orderItems.isEmpty()) {
                 String insertItemSql = "INSERT INTO order_items " +
-                        "(order_id, comic_id, quantity, price_at_purchase) " +
-                        "VALUES (?, ?, ?, ?)";
+                        "(order_id, comic_id, quantity, price_at_purchase, flashsale_id) " +
+                        "VALUES (?, ?, ?, ?, ?)";
 
                 var batch = handle.prepareBatch(insertItemSql);
 
@@ -82,6 +82,7 @@ public class OrderDAO extends ADao {
                             .bind(1, item.getComicId())
                             .bind(2, item.getQuantity())
                             .bind(3, item.getPriceAtPurchase())
+                            .bind(4, item.getFlashSaleId())
                             .add();
 
                     String updateStockSql = "UPDATE comics SET stock_quantity = stock_quantity - ? " +

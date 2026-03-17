@@ -19,6 +19,8 @@ public class FlashSale {
     private String status;
     @ColumnName("created_at")
     private LocalDateTime createdAt;
+    @ColumnName("is_deleted")
+    private boolean isDeleted;
 
     public FlashSale() {
     }
@@ -88,6 +90,13 @@ public class FlashSale {
         this.status = status;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
@@ -134,5 +143,15 @@ public class FlashSale {
                 ", endTime=" + endTime +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    public String getStartTimeFormatted() {
+        if (startTime == null) return "";
+        return startTime.format(FORMATTER);
+    }
+
+    public String getEndTimeFormatted() {
+        if (endTime == null) return "";
+        return endTime.format(FORMATTER);
     }
 }

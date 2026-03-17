@@ -126,4 +126,51 @@ public class ReportDAO {
             return result;
         });
     }
+
+    public List<Map<String, Object>> getFlashSaleTopRevenue(int limit) {
+        String sql = """
+        SELECT 
+            fs.id,
+            fs.name,
+            fs.status,
+            fs.discount_percent,
+            COUNT(DISTINCT o.id)                                    AS total_orders,
+            COALESCE(SUM(oi.quantity), 0)                          AS total_items_sold,
+            COALESCE(SUM(oi.quantity * oi.price_at_purchase), 0)   AS total_revenue
+        FROM FlashSale fs
+        LEFT JOIN order_items oi ON oi.flashsale_id = fs.id
+        LEFT JOIN orders o ON o.id = oi.order_id
+            AND o.status NOT IN ('Cancelled', 'Returned')
+        GROUP BY fs.id, fs.name, fs.status, fs.discount_percent
+        ORDER BY total_revenue DESC
+        LIMIT :limit
+    """;
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("limit", limit)
+                        .mapToMap()
+                        .list()
+        );
+    }
+
+    public List<Map<String, Object>> getMonthlyRevenue(LocalDate startDate, LocalDate endDate) {
+        return jdbi.withHandle(handle -> {
+            List<Map<String, Object>> result = handle.createQuery(
+                            "SELECT MONTH(order_date) as month, " +
+                                    "COALESCE(SUM(total_amount), 0) as revenue, " +
+                                    "COUNT(*) as order_count " +
+                                    "FROM orders " +
+                                    "WHERE order_date IS NOT NULL " +
+                                    "AND DATE(order_date) BETWEEN :start AND :end " +
+                                    "GROUP BY MONTH(order_date) " +
+                                    "ORDER BY month ASC"
+                    )
+                    .bind("start", startDate)
+                    .bind("end", endDate)
+                    .mapToMap()
+                    .list();
+            return result;
+        });
+    }
 }

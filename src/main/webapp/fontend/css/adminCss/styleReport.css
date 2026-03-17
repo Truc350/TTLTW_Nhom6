@@ -1,43 +1,41 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
     color: #333;
     width: 100%;
-    background-color: #f5f5f5;
 }
 
 .container {
     display: flex;
     height: 100vh;
+    /*overflow: hidden;*/
 }
 
 .main-content {
     flex: 1;
-    padding: 0;
-    overflow: auto;
-    background-color: #f5f5f5;
-    display: flex;
-    flex-direction: column;
+    padding: 30px;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 .report-wrapper {
-    padding: 30px;
     flex: 1;
 }
 
 .main-content > *:not(.report-wrapper) {
-    flex-shrink: 0; /* Header không co lại */
+    flex-shrink: 0;
 }
 .page-title {
     font-size: 24px;
     font-weight: 600;
     color: #333;
-    margin-bottom: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -122,9 +120,9 @@ body {
     border: 2px solid #2196F3;
 }
 
-.kpi-icon {
-    display: none;
-}
+/*.kpi-icon {*/
+/*    display: none;*/
+/*}*/
 
 .kpi-info {
     display: flex;
@@ -153,9 +151,9 @@ body {
     min-height: 450px;
 }
 
-.chart-container h3 {
-    display: none;
-}
+/*.chart-container h3 {*/
+/*    display: none;*/
+/*}*/
 
 #mainChart {
     max-height: 400px;
@@ -279,4 +277,105 @@ body {
     font-size: 64px;
     margin-bottom: 20px;
     opacity: 0.3;
+}
+
+.flashsale-stats-wrapper {
+    display: flex;
+    gap: 24px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.flashsale-ranking {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.flashsale-table-box {
+    flex: 1.4;
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+.flashsale-ranking h3,
+.flashsale-table-box h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 18px;
+}
+
+.fs-rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.fs-rank-item:last-child { border-bottom: none; }
+
+.fs-rank-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fs-rank-info { flex: 1; }
+.fs-rank-name { font-size: 13px; color: #333; margin-bottom: 5px; }
+.fs-rank-bar-wrap { height: 4px; background: #f0f0f0; border-radius: 2px; }
+.fs-rank-bar { height: 4px; background: #2196F3; border-radius: 2px; transition: width 0.6s ease; }
+.fs-rank-revenue { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; }
+
+.flashsale-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.flashsale-table th {
+    text-align: left;
+    padding: 10px 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 13px;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.flashsale-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+.flashsale-table tbody tr:last-child td { border-bottom: none; }
+.flashsale-table tbody tr:hover { background: #f9f9f9; }
+
+.fs-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge-active    { background: #e8f5e9; color: #2e7d32; }
+.badge-ended     { background: #f0f0f0; color: #555; }
+.badge-scheduled { background: #e3f2fd; color: #1565c0; }
+
+@media (max-width: 1200px) {
+    .flashsale-stats-wrapper { flex-direction: column; }
 }

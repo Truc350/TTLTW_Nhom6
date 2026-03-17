@@ -138,7 +138,8 @@
                     <h2>Điểm thưởng:</h2>
                     <div class="usePoint">
                         <p>Sử dụng <strong>${user.points != null ? user.points : 0}</strong> xu (1 xu = 1đ)</p>
-                        <input type="checkbox" name="usePoints" id="usePoints">
+                        <input type="checkbox" name="usePoints" id="usePoints"
+                        ${(user.points == null || user.points <= 0) ? 'disabled' : ''}>
                     </div>
                 </section>
             </form>
@@ -243,6 +244,7 @@
 
     let ghnDistrictId = null;
     let ghnWardCode = null;
+
     function normalize(name) {
         if (!name) return '';
         return name.toLowerCase()
@@ -252,6 +254,7 @@
             .replace(/\s+/g, ' ')
             .trim();
     }
+
     function fuzzyMatch(a, b) {
         if (!a || !b) return false;
         const na = normalize(a), nb = normalize(b);

@@ -59,4 +59,13 @@ public class VoucherDao {
         );
 
     }
+
+    public boolean deleteByCode(String code) {
+        String sql = "DELETE FROM vouchers WHERE code = :code";
+        return jdbi.withHandle(handle ->
+                handle.createUpdate(sql)
+                        .bind("code", code)
+                        .execute() > 0
+        );
+    }
 }

@@ -72,7 +72,9 @@
 
                         <td>
                             <button class="edit-btn" onclick="openEdit('${voucher.code}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
+                            <button class="delete-btn" onclick="openDeletePopup('${voucher.code}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 </c:forEach>
@@ -236,15 +238,20 @@
     </div>
 </div>
 <div class="popup-overlay" id="deleteConfirmPopup">
-    <div class="popup-box small">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h3>Xác nhận xóa</h3>
-        <p>Bạn có chắc muốn xóa mã này không?<br></p>
-        <div class="btn-row">
-            <button class="btn-cancel" id="cancelDeleteBtn">Không</button>
-            <button class="btn-save" id="confirmDeleteBtn">Có</button>
+    <form  action="${pageContext.request.contextPath}/admin/deleteVoucher" method="POST">
+
+        <input type="hidden" name="deleted-code" id="deleteCode">
+
+        <div class="popup-box small">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Xác nhận xóa</h3>
+            <p>Bạn có chắc muốn xóa mã <b id="deleteVoucherCode"></b> này không?</p>
+            <div class="btn-row">
+                <button class="btn-cancel" id="cancelDeleteBtn">Không</button>
+                <button class="btn-save" id="confirmDeleteBtn" type="submit">Có</button>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <c:if test = "${not empty message}" >
@@ -298,21 +305,6 @@
             document.getElementById('addCategory').value = '';
         };
         document.getElementById('closeAddPopup').onclick = () => addPopup.style.display = 'none';
-        // document.getElementById('saveAddBtn').onclick = () => {
-        //     const code = document.getElementById('addCode').value.trim();
-        //     const type = document.getElementById('addType').value;
-        //     const value = document.getElementById('addValue').value;
-        //     if (!code || !type || !value) {
-        //         alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
-        //         return;
-        //     }
-        //     if (addApply.value === 'category' && !document.getElementById('addCategory').value) {
-        //         alert('Vui lòng chọn thể loại!');
-        //         return;
-        //     }
-        //     alert('Tạo mã thành công!');
-        //     addPopup.style.display = 'none';
-        // };
         window.openEdit = function(code) {
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
             const row = rows.find(r => r.cells[0].textContent.trim() === code);
@@ -337,17 +329,6 @@
             alert('Cập nhật thành công!');
             editPopup.style.display = 'none';
         };
-        tbody.addEventListener('click', e => {
-            if (e.target.closest('.delete-btn')) deletePopup.style.display = 'flex';
-        });
-        document.getElementById('cancelDeleteBtn').onclick = () => deletePopup.style.display = 'none';
-        document.getElementById('confirmDeleteBtn').onclick = () => {
-            alert('Đã xóa mã!');
-            deletePopup.style.display = 'none';
-        };
-        [addPopup, editPopup, deletePopup].forEach(p => {
-            p.addEventListener('click', e => e.target === p && (p.style.display = 'none'));
-        });
         const ROWS_PER_PAGE = 5;
         const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
         document.querySelectorAll('.pro-page').forEach(btn => {
@@ -447,7 +428,16 @@
     });
 </script>
 
+<script>
+    function openDeletePopup(code) {
+        document.getElementById("deleteVoucherCode").textContent = code;
 
+        let input = document.getElementById("deleteCode");
+        if (input) input.value = code;
+
+        document.getElementById("deleteConfirmPopup").style.display = "flex";
+    }
+</script>
 
 </body>
 </html>

@@ -246,6 +246,17 @@
         </div>
     </div>
 </div>
+
+<c:if test = "${not empty message}" >
+    <script type="text/javascript">
+        window.onload = function () {
+            setTimeout(() => {
+                alert("${message}");
+            }, 300);
+        }
+    </script>
+</c:if>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const addPopup       = document.getElementById('addPopup');
@@ -287,21 +298,21 @@
             document.getElementById('addCategory').value = '';
         };
         document.getElementById('closeAddPopup').onclick = () => addPopup.style.display = 'none';
-        document.getElementById('saveAddBtn').onclick = () => {
-            const code = document.getElementById('addCode').value.trim();
-            const type = document.getElementById('addType').value;
-            const value = document.getElementById('addValue').value;
-            if (!code || !type || !value) {
-                alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
-                return;
-            }
-            if (addApply.value === 'category' && !document.getElementById('addCategory').value) {
-                alert('Vui lòng chọn thể loại!');
-                return;
-            }
-            alert('Tạo mã thành công!');
-            addPopup.style.display = 'none';
-        };
+        // document.getElementById('saveAddBtn').onclick = () => {
+        //     const code = document.getElementById('addCode').value.trim();
+        //     const type = document.getElementById('addType').value;
+        //     const value = document.getElementById('addValue').value;
+        //     if (!code || !type || !value) {
+        //         alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
+        //         return;
+        //     }
+        //     if (addApply.value === 'category' && !document.getElementById('addCategory').value) {
+        //         alert('Vui lòng chọn thể loại!');
+        //         return;
+        //     }
+        //     alert('Tạo mã thành công!');
+        //     addPopup.style.display = 'none';
+        // };
         window.openEdit = function(code) {
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
             const row = rows.find(r => r.cells[0].textContent.trim() === code);
@@ -394,6 +405,49 @@
         });
     });
 </script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector(".popup-box form");
+
+        form.addEventListener("submit", function(event) {
+            // Lấy giá trị các input
+            const code = document.getElementById("addCode").value.trim();
+            const discountTarget = document.getElementById("addType").value;
+            const discountType = form.querySelector("select[name='discount_type']").value;
+            const discountValue = document.getElementById("addValue").value;
+            const minOrder = document.getElementById("addMinOrder").value;
+            const quantity = document.getElementById("addMaxUsage").value;
+            const scope = document.getElementById("addApply").value;
+            const category = document.getElementById("addCategory").value;
+            const startDate = document.getElementById("addStart").value;
+            const endDate = document.getElementById("addEnd").value;
+
+            let errorMsg = "";
+
+            if (!code) errorMsg += "Tên mã không được để trống.\n";
+            if (!discountTarget) errorMsg += "Phải chọn mục áp dụng.\n";
+            if (!discountType) errorMsg += "Phải chọn loại giảm giá.\n";
+            if (!discountValue || discountValue <= 0) errorMsg += "Giá trị giảm phải > 0.\n";
+            if (!minOrder || minOrder < 0) errorMsg += "Đơn tối thiểu không hợp lệ.\n";
+            if (!quantity || quantity <= 0) errorMsg += "Số lượng phải > 0.\n";
+            if (scope === "category" && !category) errorMsg += "Phải chọn thể loại khi áp dụng theo thể loại.\n";
+            if (!startDate) errorMsg += "Phải chọn ngày bắt đầu.\n";
+            if (!endDate) errorMsg += "Phải chọn ngày kết thúc.\n";
+            if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+                errorMsg += "Ngày kết thúc phải sau ngày bắt đầu.\n";
+            }
+
+            if (errorMsg) {
+                event.preventDefault();
+                alert(errorMsg);
+            }
+        });
+    });
+</script>
+
+
 
 </body>
 </html>

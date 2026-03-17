@@ -48,4 +48,15 @@ public class VoucherDao {
                         .list()
                 );
     }
+
+    public boolean isExistCode(String code) {
+        String sql = "select count(*) from vouchers where code = :code";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("code", code)
+                        .mapTo(Integer.class)
+                        .one() > 0
+        );
+
+    }
 }

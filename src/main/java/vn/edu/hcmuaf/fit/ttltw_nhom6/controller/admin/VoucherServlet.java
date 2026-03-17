@@ -11,6 +11,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @WebServlet("/admin/vouchers")
 public class VoucherServlet extends HttpServlet {
@@ -37,7 +38,6 @@ public class VoucherServlet extends HttpServlet {
         String scope =   request.getParameter("apply_scope");
 
         boolean is_single_use =request.getParameter("is_single_use") != null;
-        System.out.println("is_single_use: "+is_single_use);
         LocalDateTime start_date =LocalDateTime.parse(request.getParameter("start_date"));
         LocalDateTime end_date =LocalDateTime.parse(request.getParameter("end_date"));
 
@@ -48,13 +48,28 @@ public class VoucherServlet extends HttpServlet {
             scope = category;
         }
 
-        Voucher voucher = new Voucher(code, type, used_count, value, target,  scope, quantity,
-                                        start_date, end_date, min_order_amount,is_single_use);
-        boolean isSuccess = voucherDao.addVoucher(voucher);
-        if (isSuccess) {
-            System.out.println("Successfully added voucher");
+        if(voucherDao.isExistCode(code)){
+            request.setAttribute("message","Mã này đã tồn tại!");
+            List<Voucher> allVouchers = voucherDao.getAllVouchers();
+            request.setAttribute("allVouchers", allVouchers);
+            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+           return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/vouchersManagement");
+        Voucher voucher = new Voucher(code, type, used_count, value, target,  scope, quantity,
+                                        start_date, end_date, min_order_amount,is_single_use);
+
+        if(voucherDao.addVoucher(voucher)){
+            request.setAttribute("message","Tạo thành công!");
+            request.setAttribute("allVouchers", voucherDao.getAllVouchers());
+            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+        }
+
+//        boolean isSuccess = voucherDao.addVoucher(voucher);
+//        if (isSuccess) {
+//            System.out.println("Successfully added voucher");
+//        }
+//
+//        response.sendRedirect(request.getContextPath() + "/admin/vouchersManagement");
     }
 }

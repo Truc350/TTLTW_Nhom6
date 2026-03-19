@@ -90,7 +90,7 @@
     const facebookBtn = document.getElementById("facebookLogin");
     if (facebookBtn) {
         facebookBtn.addEventListener("click", () => {
-            window.location.href = "https://www.facebook.com/v18.0/dialog/oauth?client_id=4112997315630876&redirect_uri=http://localhost:8080/LTW_Nhom5/login-facebook-callback&scope=email,public_profile";
+            window.location.href = "https://www.facebook.com/v18.0/dialog/oauth?client_id=4112997315630876&redirect_uri=http://localhost:8080/TTLTW_Nhom6/login-facebook-callback&scope=email,public_profile";
         });
     }
 </script>

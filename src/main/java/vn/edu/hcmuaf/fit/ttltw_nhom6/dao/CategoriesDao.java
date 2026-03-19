@@ -266,10 +266,10 @@ public class CategoriesDao {
                             .bind("id", id)
                             .execute()
             );
-            System.out.println("✓ Category deleted - Rows affected: " + rowsAffected);
+            System.out.println("Category deleted - Rows affected: " + rowsAffected);
             return rowsAffected > 0;
         } catch (Exception e) {
-            System.err.println("✗ Error deleting category:");
+            System.err.println("Error deleting category:");
             e.printStackTrace();
             return false;
         }

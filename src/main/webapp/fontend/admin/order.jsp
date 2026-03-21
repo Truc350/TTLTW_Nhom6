@@ -210,10 +210,16 @@
                             <td>${order.paymentMethodDisplay}</td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${not empty order.transaction_id}">
-                                        ${order.transactionId}
+                                    <c:when test="${order.hasTransaction}">
+            <span style="font-family: monospace; font-size: 12px;
+                         background: #f0f9ff; padding: 2px 6px;
+                         border-radius: 4px; color: #0369a1;">
+                    ${order.transactionId}
+            </span>
                                     </c:when>
-                                    <c:otherwise>-</c:otherwise>
+                                    <c:otherwise>
+                                        <span style="color: #999;">-</span>
+                                    </c:otherwise>
                                 </c:choose>
                             </td>
                             <td class="stars">
@@ -569,31 +575,31 @@
         btn.addEventListener('click', function () {
             const orderId = this.dataset.orderId;
 
-                fetch(BASE_URL + '/admin/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'action=confirm&orderId=' + orderId
-                })
-                    .then(async response => {
-                        const text = await response.text();
+            fetch(BASE_URL + '/admin/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=confirm&orderId=' + orderId
+            })
+                .then(async response => {
+                    const text = await response.text();
 
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error("Server response không hợp lệ");
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            showToast(data.message || 'Xác nhận đơn hàng thành công!');
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showToast('Lỗi: ' + data.message, 'error');
-                        }
-                    })
-                    .catch(error => showToast('Lỗi kết nối: ' + error, 'error'));
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error("Server response không hợp lệ");
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message || 'Xác nhận đơn hàng thành công!');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('Lỗi: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => showToast('Lỗi kết nối: ' + error, 'error'));
         });
     });
 
@@ -702,7 +708,6 @@
     });
 
 
-
     const wrapper = document.querySelector('#tab-pending .table-scroll-wrapper');
     const table = document.querySelector('#tab-pending .order-table');
 
@@ -710,7 +715,6 @@
         console.error(' Không tìm thấy');
     } else {
         console.log('Tìm thấy wrapper');
-
 
 
         // Kiểm tra có overflow không
@@ -1117,6 +1121,7 @@
             tbody.insertBefore(row, tbody.querySelector('.pagination-row-return'));
         });
     }
+
     window.addEventListener('click', function (event) {
         const rejectPopup = document.getElementById('rejectPopup');
         if (event.target === rejectPopup) {

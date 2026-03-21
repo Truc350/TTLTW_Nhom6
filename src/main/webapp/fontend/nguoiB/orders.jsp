@@ -670,8 +670,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showToastUser('Xác nhận nhận hàng thành công!');
-                        location.reload();
+                        if (data.newPoints !== undefined) {
+                            const cPointEl = document.querySelector('.C-point');
+                            if (cPointEl) {
+                                cPointEl.textContent = 'C-Point tích lũy: ' + data.newPoints;
+                            }
+                        }
+                        // showToastUser('Xác nhận nhận hàng thành công!');
+                        setTimeout(() => location.reload(), 1500);
                     } else {
                         showToastUser('Có lỗi xảy ra, vui lòng thử lại!', 'error');
                     }

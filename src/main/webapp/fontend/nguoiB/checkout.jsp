@@ -126,11 +126,25 @@
 
                 <section class="payment">
                     <h2>Phương thức Thanh toán: *</h2>
-                    <label>
-                        <input type="radio" name="payment" value="COD" checked> Thanh toán khi nhận hàng (COD)
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="COD" checked>
+                        <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png"
+                             alt="COD" style="width:28px;vertical-align:middle;margin:0 8px 0 4px;">
+                             Thanh toán khi nhận hàng (COD)
                     </label><br>
-                    <label>
-                        <input type="radio" name="payment" value="ewallet"> Ví điện tử (MoMo, ZaloPay,...)
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="momo">
+                        <img src="${pageContext.request.contextPath}/img/momo.png"
+                             alt="MoMo" style="width:28px;vertical-align:middle;margin:0 8px 0 4px;">
+                        Ví Momo
+                    </label><br>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="vnpay">
+                        <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png"
+                             alt="VNPay" style="width:28px;vertical-align:middle;margin:0 8px 0 4px;">
+                        VNPay
                     </label><br>
                 </section>
 
@@ -138,7 +152,8 @@
                     <h2>Điểm thưởng:</h2>
                     <div class="usePoint">
                         <p>Sử dụng <strong>${user.points != null ? user.points : 0}</strong> xu (1 xu = 1đ)</p>
-                        <input type="checkbox" name="usePoints" id="usePoints">
+                        <input type="checkbox" name="usePoints" id="usePoints"
+                        ${(user.points == null || user.points <= 0) ? 'disabled' : ''}>
                     </div>
                 </section>
             </form>
@@ -201,28 +216,6 @@
     </div>
 </div>
 
-<div class="container-qr-popup" style="display: none;">
-    <div class="qr-backdrop"></div>
-    <div class="momo-modal" id="momoModal" aria-hidden="true">
-        <div class="momo-dialog" role="dialog" aria-modal="true" aria-labelledby="momoTitle">
-            <button class="momo-close" id="momoClose" aria-label="Đóng popup">✕</button>
-            <h2 class="momo-title" id="momoTitle">Quét QR MoMo để thanh toán</h2>
-            <div class="momo-content">
-                <img src="${pageContext.request.contextPath}/img/qr.jpg" alt="Mã QR MoMo" class="momo-qr"/>
-                <div class="momo-info">
-                    <p><strong>Người nhận:</strong> Comic Store</p>
-                    <p><strong>SĐT MoMo:</strong> 0901234567</p>
-                    <p><strong>Số tiền:</strong> <span id="qrAmount"></span></p>
-                    <p><strong>Nội dung chuyển khoản:</strong> Thanh toán đơn hàng</p>
-                </div>
-                <button type="button" id="confirmPayment" class="btn-confirm-payment">
-                    Xác nhận đã thanh toán
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <jsp:include page="/fontend/public/Footer.jsp"/>
 
 <script>
@@ -243,6 +236,7 @@
 
     let ghnDistrictId = null;
     let ghnWardCode = null;
+
     function normalize(name) {
         if (!name) return '';
         return name.toLowerCase()
@@ -252,6 +246,7 @@
             .replace(/\s+/g, ' ')
             .trim();
     }
+
     function fuzzyMatch(a, b) {
         if (!a || !b) return false;
         const na = normalize(a), nb = normalize(b);
@@ -394,6 +389,10 @@
 
             updateTotal();
 
+            const checked = document.querySelector('input[name="shipping"]:checked');
+            if (checked) {
+                document.getElementById('hiddenShippingFee').value = checked.dataset.fee;
+            }
         } catch (err) {
             console.error("GHN Error:", err);
             if (errorEl) {
@@ -651,45 +650,13 @@
         checkoutBtn.addEventListener('click', function () {
             if (!validateCheckoutForm()) return;
 
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            if (selectedPayment?.value === 'ewallet') {
-                const containerQrPopup = document.querySelector('.container-qr-popup');
-                const qrAmountSpan = document.getElementById('qrAmount');
-                const totalText = totalAmountSpan.textContent.replace(/[^\d]/g, '');
-                if (qrAmountSpan) qrAmountSpan.textContent = formatNumber(totalText) + 'đ';
-                if (containerQrPopup) containerQrPopup.style.display = 'flex';
-            } else {
-                checkoutBtn.disabled = true;
-                checkoutBtn.textContent = 'Đang xử lý...';
-                districtSelect.disabled = false;
-                wardSelect.disabled = false;
-                orderForm.submit();
+            const checked = document.querySelector('input[name="shipping"]:checked');
+            if (checked && checked.dataset.fee) {
+                document.getElementById('hiddenShippingFee').value = checked.dataset.fee;
             }
-        });
-    }
 
-    const momoClose = document.getElementById('momoClose');
-    const containerQrPopup = document.querySelector('.container-qr-popup');
-    const confirmPaymentBtn = document.getElementById('confirmPayment');
-
-    if (momoClose) {
-        momoClose.addEventListener('click', () => {
-            if (containerQrPopup) containerQrPopup.style.display = 'none';
-        });
-    }
-
-    if (containerQrPopup) {
-        containerQrPopup.addEventListener('click', function (e) {
-            if (e.target === this || e.target.classList.contains('qr-backdrop')) {
-                this.style.display = 'none';
-            }
-        });
-    }
-
-    if (confirmPaymentBtn) {
-        confirmPaymentBtn.addEventListener('click', function () {
-            this.disabled = true;
-            this.textContent = 'Đang xử lý...';
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Đang xử lý...';
             districtSelect.disabled = false;
             wardSelect.disabled = false;
             orderForm.submit();

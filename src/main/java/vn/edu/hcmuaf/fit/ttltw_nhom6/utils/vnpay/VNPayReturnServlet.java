@@ -87,7 +87,10 @@ public class VNPayReturnServlet extends HttpServlet {
                 }
             }
             double subtotal = (Double) session.getAttribute("checkoutSubtotal");
-            double shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            Object shippingFeeObj = session.getAttribute("pending_shippingFee");
+            double shippingFee = (shippingFeeObj != null)
+                    ? ((Number) shippingFeeObj).doubleValue()
+                    : ("express".equals(shippingMethod) ? 50000 : 25000);
 
             int pointsToUse = 0;
             double pointsDiscount = 0;

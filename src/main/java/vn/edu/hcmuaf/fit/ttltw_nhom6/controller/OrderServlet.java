@@ -10,6 +10,7 @@ import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.*;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.*;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.momo.MoMoUtils;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.vnpay.VNPayUtils;
 
 import java.io.IOException;
@@ -53,7 +54,6 @@ public class OrderServlet extends HttpServlet {
         }
 
         try {
-            // Lấy thông tin từ form
             String recipientName = request.getParameter("receiverName");
             String shippingPhone = request.getParameter("receiverPhone");
             String province = request.getParameter("province");
@@ -62,7 +62,80 @@ public class OrderServlet extends HttpServlet {
             String streetAddress = request.getParameter("address");
             String shippingMethod = request.getParameter("shipping"); // standard hoặc express
             String paymentMethod = request.getParameter("payment"); // COD hoặc ewallet
+
+            session.setAttribute("pending_receiverName",  request.getParameter("receiverName"));
+            session.setAttribute("pending_receiverPhone", request.getParameter("receiverPhone"));
+            session.setAttribute("pending_province",      request.getParameter("province"));
+            session.setAttribute("pending_district",      request.getParameter("district"));
+            session.setAttribute("pending_ward",          request.getParameter("ward"));
+            session.setAttribute("pending_address",       request.getParameter("address"));
+            session.setAttribute("pending_shipping",      request.getParameter("shipping"));
+            session.setAttribute("pending_usePoints",     "true".equals(request.getParameter("usePoints")));
+
+            try {
+                String feeParam = request.getParameter("shippingFee");
+                double fee = (feeParam != null && !feeParam.isEmpty())
+                        ? Double.parseDouble(feeParam)
+                        : ("express".equals(request.getParameter("shipping")) ? 50000 : 25000);
+                session.setAttribute("pending_shippingFee", fee);
+            } catch (NumberFormatException e) {
+                session.setAttribute("pending_shippingFee",
+                        "express".equals(request.getParameter("shipping")) ? 50000.0 : 25000.0);
+            }
+
             String usePointsStr = request.getParameter("usePoints");
+
+            if ("vnpay".equals(paymentMethod)) {
+                double subtotal    = (Double) session.getAttribute("checkoutSubtotal");
+
+                double shippingFee;
+                try {
+                    String shippingFeeParam = request.getParameter("shippingFee");
+                    shippingFee = (shippingFeeParam != null && !shippingFeeParam.isEmpty())
+                            ? Double.parseDouble(shippingFeeParam)
+                            : ("express".equals(shippingMethod) ? 50000 : 25000);
+                } catch (NumberFormatException e) {
+                    shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+                }
+
+                boolean usePoints  = "true".equals(request.getParameter("usePoints"));
+                double discount    = (usePoints && user.getPoints() > 0) ? user.getPoints() : 0;
+                long totalAmount   = (long) Math.max(subtotal + shippingFee - discount, 0);
+
+                String returnUrl = request.getScheme() + "://" + request.getServerName()
+                        + ":" + request.getServerPort()
+                        + request.getContextPath() + "/vnpay-return";
+
+                String payUrl = VNPayUtils.createPaymentUrl(
+                        0, totalAmount,
+                        "Thanh toan don hang Comic Store",
+                        returnUrl,
+                        request.getRemoteAddr()
+                );
+                response.sendRedirect(payUrl);
+                return;
+            }
+
+            if ("momo".equals(paymentMethod)) {
+                double subtotal = (Double) session.getAttribute("checkoutSubtotal");
+                double shippingFee;
+                try {
+                    String fp = request.getParameter("shippingFee");
+                    shippingFee = (fp != null && !fp.isEmpty())
+                            ? Double.parseDouble(fp)
+                            : ("express".equals(shippingMethod) ? 50000 : 25000);
+                } catch (NumberFormatException e) {
+                    shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+                }
+                boolean usePoints = "true".equals(request.getParameter("usePoints"));
+                double discount   = (usePoints && user.getPoints() > 0) ? user.getPoints() : 0;
+                long totalAmount  = (long) Math.max(subtotal + shippingFee - discount, 0);
+
+                String payUrl = MoMoUtils.createPaymentUrl(0, totalAmount,
+                        "Thanh toan don hang Comic Store");
+                response.sendRedirect(request.getContextPath() + payUrl);
+                return;
+            }
 
             // Validate thông tin bắt buộc
             if (recipientName == null || recipientName.trim().isEmpty() ||
@@ -90,7 +163,16 @@ public class OrderServlet extends HttpServlet {
                 session.setAttribute("pending_usePoints", usePoints);
 //                Tinh tong tien de gui sang vnpay
                 double subtotalVnpay = (Double) session.getAttribute("checkoutSubtotal");
-                double shippingFeeVnpay = "express".equals(shippingMethod) ? 50000 : 25000;
+                double shippingFeeVnpay;
+                try {
+                    String shippingFeeParam = request.getParameter("shippingFee");
+                    shippingFeeVnpay = (shippingFeeParam != null && !shippingFeeParam.isEmpty())
+                            ? Double.parseDouble(shippingFeeParam)
+                            : ("express".equals(shippingMethod) ? 50000 : 25000);
+                } catch (NumberFormatException e) {
+                    shippingFeeVnpay = "express".equals(shippingMethod) ? 50000 : 25000;
+                }
+
                 double pointsDiscountVnpay = 0;
                 if (usePoints && user.getPoints() > 0) {
                     pointsDiscountVnpay = user.getPoints();

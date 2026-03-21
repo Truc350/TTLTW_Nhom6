@@ -70,7 +70,8 @@ public class OrderServlet extends HttpServlet {
             session.setAttribute("pending_ward",          request.getParameter("ward"));
             session.setAttribute("pending_address",       request.getParameter("address"));
             session.setAttribute("pending_shipping",      request.getParameter("shipping"));
-            session.setAttribute("pending_usePoints",     "true".equals(request.getParameter("usePoints")));
+            String upParam = request.getParameter("usePoints");
+            session.setAttribute("pending_usePoints", "on".equals(upParam) || "true".equals(upParam));
 
             try {
                 String feeParam = request.getParameter("shippingFee");
@@ -127,7 +128,11 @@ public class OrderServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
                 }
-                boolean usePoints = "true".equals(request.getParameter("usePoints"));
+
+                String usePointsParam = request.getParameter("usePoints");
+                boolean usePoints = "on".equals(usePointsParam) || "true".equals(usePointsParam);
+                session.setAttribute("pending_usePoints", usePoints);
+
                 double discount   = (usePoints && user.getPoints() > 0) ? user.getPoints() : 0;
                 long totalAmount  = (long) Math.max(subtotal + shippingFee - discount, 0);
 

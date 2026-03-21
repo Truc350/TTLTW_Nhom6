@@ -705,6 +705,15 @@ public class OrderService {
                 }
                 order.put("paymentMethodDisplay", paymentMethodDisplay);
 
+                Object transactionIdObj = order.get("transaction_id");
+                if (transactionIdObj != null && !transactionIdObj.toString().isEmpty()) {
+                    order.put("transactionId", transactionIdObj.toString());
+                    order.put("hasTransaction", true);
+                } else {
+                    order.put("transactionId", null);
+                    order.put("hasTransaction", false);
+                }
+
                 Object avgRatingObj = order.get("average_rating");
                 Object reviewCountObj = order.get("review_count");
 

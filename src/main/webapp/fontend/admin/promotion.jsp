@@ -1,3 +1,4 @@
+<%--<jsp:useBean id="name" scope="request" type="vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category"/>--%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -108,7 +109,7 @@
                 </div>
                 <div>
                     <label>Áp dụng</label>
-                    <select id="addType" name="discount_target"  required>
+                    <select id="addTarget" name="discount_target"  required>
                         <option value="Vận chuyển">Vận chuyển</option>
                         <option value="Giảm giá">Giảm giá</option>
                     </select>
@@ -152,19 +153,9 @@
                 </div>
 
                 <!-- Chọn thể loại (ẩn mặc định) -->
-                <div id="addCategoryBox" style="grid-column: 1 / -1;">
-                    <label>Thể loại</label>
-                    <select id="addCategory" name="cate" disabled>
-                        <option value="">-- Chọn thể loại --</option>
-                        <option>Trinh thám</option>
-                        <option>Hài hước</option>
-                        <option>Ngôn tình</option>
-                        <option>Hành động</option>
-                        <option>Kinh dị</option>
-                        <option>Phiêu lưu</option>
-                        <option>Học đường</option>
-                        <option>Giả tưởng</option>
-                    </select>
+                <div id="addCategoryBox" style="grid-column: 1 / -1;  display: none;">
+                    <label for="addCategory" >Thể loại</label>
+                    <select id="addCategory" name="cate" disabled>  </select>
                 </div>
 
                 <!-- Ngày bắt đầu + kết thúc -->
@@ -267,28 +258,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const addPopup       = document.getElementById('addPopup');
-        const addApply       = document.getElementById('addApply');
-        const addCategoryBox = document.getElementById('addCategoryBox');
         const tbody          = document.getElementById('promoTableBody');
         const editPopup      = document.getElementById('editPopup');
-        const deletePopup    = document.getElementById('deleteConfirmPopup');
-        const toggleCategory = () => {
-            addCategoryBox.classList.toggle('hide', addApply.value !== 'category');
-        };
-        // Gắn event change
-        addApply.addEventListener('change', () => {
-            const categorySelect = document.getElementById('addCategory');
-            if (addApply.value === 'category') {
-                categorySelect.disabled = false;
-                categorySelect.style.opacity = '1';
-                categorySelect.style.pointerEvents = 'auto';
-            } else {
-                categorySelect.disabled = true;
-                categorySelect.style.opacity = '0.5';
-                categorySelect.style.pointerEvents = 'none';
-                categorySelect.value = ''; // xóa lựa chọn cũ
-            }
-        });
         document.getElementById('openAddPopup').onclick = () => {
             addPopup.style.display = 'flex';
             document.getElementById('addCode').value = '';
@@ -299,9 +270,8 @@
             document.getElementById('addSingleUse').checked = false;
             document.getElementById('addStart').value = '';
             document.getElementById('addEnd').value = '';
-            addApply.value = 'all';
+            document.getElementById('addCategoryBox').style.display = 'none';
             document.getElementById('addCategory').disabled = true;
-            document.getElementById('addCategory').style.opacity = '0.5';
             document.getElementById('addCategory').value = '';
         };
         document.getElementById('closeAddPopup').onclick = () => addPopup.style.display = 'none';
@@ -389,13 +359,43 @@
 
 
 <script>
+    document.getElementById("addApply").addEventListener("change", function () {
+        let value = this.value;
+        let categorySelect = document.getElementById("addCategory");
+        let categoryBox = document.getElementById("addCategoryBox");
+
+        if (value === "category") {
+            categorySelect.disabled = false;
+            categorySelect.style.pointerEvents = 'auto';
+            categoryBox.style.display = 'block';
+
+            fetch("${pageContext.request.contextPath}/admin/loadCategory")
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        categorySelect.appendChild(opt);
+                    });
+                });
+        } else {
+            categorySelect.disabled = true;
+            categorySelect.style.pointerEvents = 'none';
+            categorySelect.value = '';
+            categoryBox.style.display = 'none';
+        }
+    });
+</script>
+
+<script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.querySelector(".popup-box form");
 
         form.addEventListener("submit", function(event) {
             // Lấy giá trị các input
             const code = document.getElementById("addCode").value.trim();
-            const discountTarget = document.getElementById("addType").value;
+            const discountTarget = document.getElementById("addTarget").value;
             const discountType = form.querySelector("select[name='discount_type']").value;
             const discountValue = document.getElementById("addValue").value;
             const minOrder = document.getElementById("addMinOrder").value;

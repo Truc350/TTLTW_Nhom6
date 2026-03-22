@@ -2,8 +2,11 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VoucherDao {
@@ -67,5 +70,14 @@ public class VoucherDao {
                         .bind("code", code)
                         .execute() > 0
         );
+    }
+
+    public List<String> getCategories(){
+        String sql = "Select name_categories from categories";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                   .mapTo(String.class)
+                    .list()
+                );
     }
 }

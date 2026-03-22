@@ -74,7 +74,15 @@ public class CheckoutServlet extends HttpServlet {
 
                 CartItem tempItem = new CartItem(comic, quantity, flashSaleId, flashSalePrice);
                 double subtotal = tempItem.getFinalPrice() * quantity;
+
+
                 double shippingFee = 25000;
+                String shippingFeeParam = request.getParameter("shippingFee");
+                if (shippingFeeParam != null && !shippingFeeParam.isEmpty()) {
+                    try {
+                        shippingFee = Double.parseDouble(shippingFeeParam);
+                    } catch (NumberFormatException ignored) {}
+                }
 
                 List<CartItem> selectedItems = new ArrayList<>();
                 selectedItems.add(tempItem);

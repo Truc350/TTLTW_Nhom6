@@ -305,7 +305,8 @@
                 to_district_id: toDistrict,
                 to_ward_code: toWard,
                 weight: 300,
-                insurance_value: ${checkoutSubtotal}
+                <%--insurance_value: ${checkoutSubtotal}--%>
+                insurance_value: 0
             })
         });
         const json = await res.json();

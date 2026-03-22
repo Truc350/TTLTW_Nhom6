@@ -237,7 +237,15 @@ public class OrderServlet extends HttpServlet {
 
             Object subtotalObj = session.getAttribute("checkoutSubtotal");
             double subtotal = subtotalObj != null ? ((Double) subtotalObj) : 0.0;
-            double shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            double shippingFee;
+            try {
+                String shippingFeeParam = request.getParameter("shippingFee");
+                shippingFee = (shippingFeeParam != null && !shippingFeeParam.isEmpty())
+                        ? Double.parseDouble(shippingFeeParam)
+                        : ("express".equals(shippingMethod) ? 50000 : 25000);
+            } catch (NumberFormatException e) {
+                shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            }
 
             int pointsToUse = 0;
             double pointsDiscount = 0;

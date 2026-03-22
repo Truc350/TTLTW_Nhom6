@@ -115,10 +115,12 @@
                     <label>
                         <input type="radio" name="shipping" value="standard" data-fee="25000" checked>
                         Giao hàng Tiêu Chuẩn - <span id="standardFeeDisplay">25.000 đ</span>
+                        <span id="standardETA" style="color: #888; font-size: 13px"></span>
                     </label><br>
                     <label>
                         <input type="radio" name="shipping" value="express" data-fee="50000">
                         Giao hàng Hỏa Tốc - <span id="expressFeeDisplay">50.000 đ</span>
+                        <span id="expressETA" style="color:#888; font-size:13px;"></span>
                     </label>
 
                     <input type="hidden" name="shippingFee" id="hiddenShippingFee" value="25000">
@@ -368,13 +370,40 @@
                 }
             }
 
-            if (stdFee !== null) {
+            // if (stdFee !== null) {
+            //     stdRadio.dataset.fee = stdFee;
+            //     stdRadio.disabled = false;
+            //     if (stdDisplay) stdDisplay.textContent = formatNumber(stdFee) + ' đ';
+            // } else {
+            //     stdRadio.disabled = true;
+            //     if (stdDisplay) stdDisplay.textContent = 'Không khả dụng';
+            //     if (stdRadio.checked && expFee !== null) expRadio.checked = true;
+            // }
+            //
+            // if (expFee !== null) {
+            //     expRadio.dataset.fee = expFee;
+            //     expRadio.disabled = false;
+            //     if (expDisplay) expDisplay.textContent = formatNumber(expFee) + ' đ';
+            // } else {
+            //     expRadio.disabled = true;
+            //     if (expDisplay) expDisplay.textContent = 'Không khả dụng';
+            // }
+            const stdETA = document.getElementById('standardETA');
+            const expETA = document.getElementById('expressETA');
+            if (stdFee != null){
                 stdRadio.dataset.fee = stdFee;
                 stdRadio.disabled = false;
                 if (stdDisplay) stdDisplay.textContent = formatNumber(stdFee) + ' đ';
-            } else {
+                try{
+                    const eta = await  getExpectedDelivery(stdService.service_id,ghnDistrictId, ghnWardCode);
+                    if (stdETA) stdETA.textContent = '— Dự kiến: '+eta;
+                }catch (e) {
+                    if (stdETA) stdETA.textContent = '';
+                }
+            }else {
                 stdRadio.disabled = true;
                 if (stdDisplay) stdDisplay.textContent = 'Không khả dụng';
+                if (stdETA) stdETA.textContent = '';
                 if (stdRadio.checked && expFee !== null) expRadio.checked = true;
             }
 
@@ -382,9 +411,16 @@
                 expRadio.dataset.fee = expFee;
                 expRadio.disabled = false;
                 if (expDisplay) expDisplay.textContent = formatNumber(expFee) + ' đ';
+                try {
+                    const eta = await getExpectedDelivery(expService.service_id, ghnDistrictId, ghnWardCode);
+                    if (expETA) expETA.textContent = '— Dự kiến: ' + eta;
+                } catch (e) {
+                    if (expETA) expETA.textContent = '';
+                }
             } else {
                 expRadio.disabled = true;
                 if (expDisplay) expDisplay.textContent = 'Không khả dụng';
+                if (expETA) expETA.textContent = '';
             }
 
             updateTotal();
@@ -695,6 +731,29 @@
 
     loadProvinces();
     updateTotal();
+</script>
+<script>
+   async function getExpectedDelivery(serviceId, toDistrict, toWard){
+       const res = await fetch("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime", {
+           method: "POST",
+           headers: {
+               "Content-Type": "application/json",
+               "Token": GHN_TOKEN,
+               "ShopId": String(GHN_SHOP_ID)
+           },
+           body: JSON.stringify({
+               from_district_id: FROM_DISTRICT,
+               to_district_id: toDistrict,
+               to_ward_code: toWard,
+               service_id: serviceId
+           })
+       });
+       const json = await res.json();
+       if (json.code !== 200) throw new Error(json.message);
+       const ts = json.data.leadtime;
+       const date = new Date(ts * 1000);
+       return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+   }
 </script>
 
 </body>

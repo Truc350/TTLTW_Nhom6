@@ -100,6 +100,163 @@
 
     togglePassword("toggle1");
     togglePassword("toggle2");
+
+//     regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0[35789])[0-9]{8}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    function setValid(input){
+        input.classList.remove("invalid");
+        input.classList.add("valid");
+    }
+    function setInvalid(input){
+        input.classList.remove("valid");
+        input.classList.add("invalid");
+    }
+    function clearState(input){
+        input.classList.remove("valid","invalid");
+    }
+//     valid tung field
+    function  validateUsername(){
+        const el = document.getElementById("username");
+        if (el.value.trim()===""){
+            setInvalid(el);return false;
+        }
+        setValid(el); return true;
+    }
+    function validateEmail(){
+        const el = document.getElementById("email");
+        const val = el.value.trim();
+        // email co the de trong neu da nhap phone - xử lý sau khi blur phone
+        if (val ===""){
+            clearState(el); return null;
+        }
+        if (!emailRegex.test(val)){
+            setInvalid(el); return false;
+        }
+        setValid(el);return true;
+    }
+    function validatePhone(){
+        const el = document.getElementById("phone");
+        const val = el.value.trim();
+        if (val === "") {
+            clearState(el); return null;
+        }
+        if (!phoneRegex.test(val)) {
+            setInvalid(el); return false;
+        }
+        setValid(el); return true;
+    }
+    function validateEmailPhone(){
+        const emailEl = document.getElementById("email");
+        const phoneEl = document.getElementById("phone");
+        const emailVal = emailEl.value.trim();
+        const phoneVal = phoneEl.value.trim();
+
+        const emailOK = emailVal !== "" && emailRegex.test(emailVal);
+        const phoneOK = phoneVal !== "" && phoneRegex.test(phoneVal);
+
+        if (emailVal === "" && phoneVal === ""){
+            setInvalid(emailEl);
+            setInvalid(phoneEl);
+            return false;
+        }
+        if (emailVal !== ""){
+            emailOK ? setValid(emailEl) : setInvalid(emailEl);
+        }else  {
+            clearState(emailEl);
+        }
+        if (phoneVal !== "") {
+            phoneOK ? setValid(phoneEl) : setInvalid(phoneEl);
+        } else {
+            clearState(phoneEl);
+        }
+        return emailOK || phoneOK;
+    }
+    function validatePassword() {
+        const el = document.getElementById("password");
+        if (!passwordRegex.test(el.value.trim())) {
+            setInvalid(el); return false;
+        }
+        setValid(el); return true;
+    }
+    function validateConfirmPassword() {
+        const el = document.getElementById("confirmPassword");
+        const pw = document.getElementById("password").value.trim();
+        if (el.value.trim() === "" || el.value.trim() !== pw) {
+            setInvalid(el); return false;
+        }
+        setValid(el); return true;
+    }
+    document.getElementById("username").addEventListener("input", validateUsername);
+
+    document.getElementById("email").addEventListener("input", () => {
+        validateEmail();
+        // Nếu đang có lỗi "cả hai trống" thì re-check cặp
+        const phoneVal = document.getElementById("phone").value.trim();
+        if (phoneVal !== "") validateEmailPhone();
+    });
+
+    document.getElementById("phone").addEventListener("input", () => {
+        validatePhone();
+        const emailVal = document.getElementById("email").value.trim();
+        if (emailVal !== "") validateEmailPhone();
+    });
+
+    document.getElementById("password").addEventListener("input", () => {
+        validatePassword();
+        // Nếu confirmPassword đã có giá trị thì re-check
+        if (document.getElementById("confirmPassword").value.trim() !== "") {
+            validateConfirmPassword();
+        }
+    });
+
+    document.getElementById("confirmPassword").addEventListener("input", validateConfirmPassword);
+    document.getElementById("email").addEventListener("blur", validateEmailPhone);
+    document.getElementById("phone").addEventListener("blur", validateEmailPhone);
+    function validateRegister() {
+        const clientError = document.getElementById("clientError");
+        clientError.style.display = "none";
+        clientError.innerText = "";
+
+        const okUsername = validateUsername();
+        const okEmailPhone = validateEmailPhone();
+        const okPassword = validatePassword();
+        const okConfirm = validateConfirmPassword();
+
+        if (!okUsername) {
+            showRegisterError("Vui lòng nhập tên đăng nhập"); return false;
+        }
+        if (!okEmailPhone) {
+            const emailVal = document.getElementById("email").value.trim();
+            const phoneVal = document.getElementById("phone").value.trim();
+            if (!emailVal && !phoneVal) {
+                showRegisterError("Vui lòng nhập ít nhất email hoặc số điện thoại");
+            } else if (emailVal && !emailRegex.test(emailVal)) {
+                showRegisterError("Email không đúng định dạng");
+            } else if (phoneVal && !phoneRegex.test(phoneVal)) {
+                showRegisterError("Số điện thoại không đúng định dạng (VD: 0912345678)");
+            }
+            return false;
+        }
+        if (!okPassword) {
+            showRegisterError("Mật khẩu phải hơn 8 ký tự, gồm chữ hoa, chữ thường và ký tự đặc biệt");
+            return false;
+        }
+        if (!okConfirm) {
+            showRegisterError("Mật khẩu xác nhận không khớp"); return false;
+        }
+        return true;
+    }
+
+    function showRegisterError(msg) {
+        const clientError = document.getElementById("clientError");
+        clientError.innerText = msg;
+        clientError.style.display = "block";
+    }
+
+
 </script>
 
 <c:if test="${not empty success}">
@@ -115,80 +272,7 @@
 
 </body>
 
-<script>
-    function validateRegister() {
-        const username = document.getElementById("username").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const confirmPassword = document.getElementById("confirmPassword").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-        const clientError = document.getElementById("clientError");
-        const serverError = document.getElementById("serverError");
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
-        const phoneRegex = /^(0[35789])[0-9]{8}$/;
 
-        clientError.style.display = "none";
-        clientError.innerText = "";
-        if (serverError) serverError.style.display = "none";
-
-        if (!username || !password || !confirmPassword) {
-            showRegisterError("Vui lòng nhập đầy đủ thông tin");
-            return false;
-        }
-        if (!email && !phone) {
-            showRegisterError("Vui lòng nhập ít nhất email hoặc số điện thoại");
-            return false;
-        }
-
-        if (email && !emailRegex.test(email)) {
-            showRegisterError("Email không đúng định dạng");
-            return false;
-        }
-        if (phone && !phoneRegex.test(phone)) {
-            showRegisterError("Số điện thoại không đúng định dạng (VD: 0912345678)");
-            return false;
-        }
-
-        if (!passwordRegex.test(password)) {
-            showRegisterError(
-                "Mật khẩu phải hơn 8 ký tự, gồm chữ hoa, chữ thường và ký tự đặc biệt"
-            );
-            return false;
-        }
-
-        if (password !== confirmPassword) {
-            showRegisterError("Mật khẩu xác nhận không khớp");
-            return false;
-        }
-
-        return true;
-    }
-
-    function showRegisterError(msg) {
-        const clientError = document.getElementById("clientError");
-        const serverError = document.getElementById("serverError");
-
-        if (serverError) serverError.style.display = "none";
-
-        clientError.innerText = msg;
-        clientError.style.display = "block";
-    }
-
-</script>
-<script>
-    ["username", "email","phone", "password", "confirmPassword"].forEach(id => {
-        document.getElementById(id).addEventListener("input", clearRegisterErrors);
-    });
-
-    function clearRegisterErrors() {
-        const clientError = document.getElementById("clientError");
-        const serverError = document.getElementById("serverError");
-
-        if (clientError) clientError.style.display = "none";
-        if (serverError) serverError.style.display = "none";
-    }
-</script>
 
 
 </html>

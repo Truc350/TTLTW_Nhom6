@@ -205,7 +205,6 @@ public class MoMoReturnServlet extends HttpServlet {
             session.setAttribute("orderError", "Có lỗi xảy ra: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/checkout");
         }
-
     }
 
     @Override

@@ -22,9 +22,9 @@ public class ValidationUtils {
 
     public static boolean isAllBlank(String... values) {
         for (String v : values) {
-            if (v != null && v.trim().isEmpty()) return true;
+            if (v != null && !v.trim().isEmpty()) return false;
         }
-        return false;
+        return true;
     }
 
     public static boolean isAtLeastOne(String... values) {

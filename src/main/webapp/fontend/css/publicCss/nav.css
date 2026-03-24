@@ -764,3 +764,194 @@ a {
 #login-hint-toast a:hover {
     opacity: 0.85;
 }
+
+.social-float-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+}
+
+.social-toggle-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.social-toggle-btn:hover {
+    transform: scale(1.05);
+}
+
+.social-toggle-btn.open {
+    transform: rotate(20deg);
+}
+
+.social-items {
+    background: #fff;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.social-items.open {
+    max-height: 200px;
+    opacity: 1;
+    background: #fff;
+}
+
+.social-float-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: block;
+}
+
+.social-float-btn:hover {
+    transform: scale(1.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.social-float-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.social-float-btn {
+    position: relative;
+}
+
+.social-float-btn::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 54px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.social-float-btn:hover::before {
+    opacity: 1;
+}
+
+
+
+/*Gợi ý tìm kiếm*/
+.suggest-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+    animation: suggestFadeIn 0.15s ease;
+}
+
+.suggest-dropdown.open {
+    display: block;
+}
+
+@keyframes suggestFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.suggest-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+}
+
+.suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.12s;
+    color: #222;
+    text-decoration: none;
+}
+
+.suggest-item:hover,
+.suggest-item.active {
+    background: #f5f5f5;
+}
+
+.suggest-item-icon {
+    color: #bbb;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.suggest-item-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.suggest-item-name mark {
+    background: transparent;
+    color: #ff4c4c;
+    font-weight: 700;
+    padding: 0;
+}
+
+.suggest-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 8px 16px;
+    text-align: center;
+}
+
+.suggest-footer a {
+    color: #ff4c4c;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.suggest-footer a:hover { text-decoration: underline; }
+
+.suggest-empty {
+    padding: 14px 16px;
+    color: #999;
+    font-size: 13px;
+    text-align: center;
+}

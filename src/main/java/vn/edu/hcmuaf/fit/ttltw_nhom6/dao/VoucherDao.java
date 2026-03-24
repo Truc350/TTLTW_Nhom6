@@ -5,7 +5,9 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,5 +81,26 @@ public class VoucherDao {
                    .mapTo(String.class)
                     .list()
                 );
+    }
+    public void updateVoucher(String code, BigDecimal minOrderAmount, int quantity,
+                              LocalDateTime endDate, boolean isSingleUse) {
+
+        jdbi.useHandle(handle ->
+                handle.createUpdate("""
+            UPDATE vouchers
+            SET 
+                min_order_amount = :minOrderAmount,
+                quantity = :quantity,
+                end_date = :endDate,
+                is_single_use = :isSingleUse
+            WHERE code = :code
+        """)
+                        .bind("minOrderAmount", minOrderAmount)
+                        .bind("quantity", quantity)
+                        .bind("endDate", endDate)
+                        .bind("isSingleUse", isSingleUse)
+                        .bind("code", code)
+                        .execute()
+        );
     }
 }

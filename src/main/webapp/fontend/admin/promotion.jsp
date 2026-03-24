@@ -37,12 +37,14 @@
             <table class="promo-table">
                 <thead>
                 <tr>
-                    <th>Mã giảm giá</th>
+                    <th>Mã</th>
                     <th>Giá trị</th>
                     <th>Áp dụng</th>
-                    <th>Đã dùng/Tổng</th>
-                    <th>Đơn tối thiểu</th>
-                    <th>Hạn sử dụng</th>
+                    <th>Thể loại</th>
+                    <th>Dùng/Tổng</th>
+                    <th>Giá tối thiểu</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
                     <th>Trạng thái</th>
                     <th></th>
                 </tr>
@@ -54,8 +56,10 @@
                         <td>${voucher.code}</td>
                         <td>${voucher.discountValue}</td>
                         <td>${voucher.discountTarget}</td>
+                        <td>${voucher.applyScope}</td>
                         <td>${voucher.usedCount}/${voucher.quantity}</td>
                         <td>${voucher.minOrderAmount}</td>
+                        <td>${voucher.startDate}</td>
                         <td>${voucher.endDate}</td>
 
                         <c:choose>
@@ -141,7 +145,7 @@
                 <div>
                     <label>Áp dụng</label>
                     <select id="addApply" name="apply_scope">
-                        <option value="all">Toàn bộ sản phẩm</option>
+                        <option value="Tất cả">Toàn bộ sản phẩm</option>
                         <option value="category">Một thể loại</option>
                     </select>
                 </div>
@@ -172,61 +176,64 @@
             </div>
 
             <div class="btn-row">
-                <button type="submit" class="btn-cancel" id="closeAddPopup">Hủy</button>
+                <button class="btn-cancel" id="closeAddPopup">Hủy</button>
                 <button type="submit" class="btn-save" id="saveAddBtn">Tạo mã</button>
             </div>
         </form>
     </div>
 </div>
 <div class="popup-overlay" id="editPopup">
-    <div class="popup-box">
-        <h3>Sửa mã khuyến mãi</h3>
-        <div class="popup-grid">
-            <div>
-                <label>Tên mã</label>
-                <p id="editCode" class="readonly"></p>
-            </div>
-            <div>
-                <label>Loại giảm giá</label>
-                <p id="editTypeDisplay" class="readonly"></p>
-            </div>
-            <div>
-                <label>Giá trị giảm</label>
-                <p id="editValueDisplay" class="readonly"></p>
-            </div>
-            <div>
-                <label>Áp dụng cho</label>
-                <p id="editApplyDisplay" class="readonly">Toàn bộ sản phẩm</p>
-            </div>
-            <div>
-                <label>Đơn tối thiểu</label>
-                <input type="number" id="editMinOrder" min="0" placeholder="0">
-            </div>
-            <div>
-                <label>Số lượng tối đa</label>
-                <input type="number" id="editMaxUsage" min="1">
-            </div>
-            <div class="checkbox-row">
-                <input type="checkbox" id="editSingleUse">
-                <label for="editSingleUse">Mỗi khách chỉ dùng được 1 lần</label>
-            </div>
-            <div class="date-row">
+    <form action="${pageContext.request.contextPath}/admin/editVoucher" method="GET" >
+        <div class="popup-box">
+            <h3>Sửa mã khuyến mãi</h3>
+            <div class="popup-grid">
                 <div>
-                    <label>Từ ngày</label>
-                    <input type="date" id="editStart">
+                    <label>Tên mã</label>
+                    <input type= 'text'  id="editCode"  name="code" class="readonly">
                 </div>
                 <div>
-                    <label>Đến ngày</label>
-                    <input type="date" id="editEnd">
+                    <label>Loại giảm giá</label>
+                    <input type= 'text'id="editTypeDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Giá trị giảm</label>
+                    <input type= 'text'  id="editValueDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Áp dụng cho</label>
+                    <input type= 'text' id="editApplyDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Đơn tối thiểu</label>
+                    <input type="number" id="editMinOrder" min="0"  name="minOrder" placeholder="0">
+                </div>
+                <div>
+                    <label>Số lượng tối đa</label>
+                    <input type="number" id="editMaxUsage"  name="quantity" min="1">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="editSingleUse"  name="">
+                    <label for="editSingleUse">Mỗi khách chỉ dùng được 1 lần</label>
+                </div>
+                <div class="date-row">
+                    <div>
+                        <label>Từ ngày</label>
+                        <input type="date" id="editStart"  name="">
+                    </div>
+                    <div>
+                        <label>Đến ngày</label>
+                        <input type="date" id="editEnd" name="endDate">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="btn-row">
-            <button class="btn-cancel" id="closeEditPopup">Hủy</button>
-            <button class="btn-save" id="saveEditBtn">Cập nhật</button>
+            <div class="btn-row">
+                <button class="btn-cancel" id="closeEditPopup" type="button">Hủy</button>
+                <button class="btn-save" id="saveEditBtn"type="submit">Cập nhật</button>
+            </div>
         </div>
-    </div>
+    </form>
+
 </div>
 <div class="popup-overlay" id="deleteConfirmPopup">
     <form  action="${pageContext.request.contextPath}/admin/deleteVoucher" method="POST">
@@ -238,7 +245,7 @@
             <h3>Xác nhận xóa</h3>
             <p>Bạn có chắc muốn xóa mã <b id="deleteVoucherCode"></b> này không?</p>
             <div class="btn-row">
-                <button class="btn-cancel" id="cancelDeleteBtn">Không</button>
+                <button class="btn-cancel" id="cancelDeleteBtn" type ="button">Không</button>
                 <button class="btn-save" id="confirmDeleteBtn" type="submit">Có</button>
             </div>
         </div>
@@ -260,6 +267,7 @@
         const addPopup       = document.getElementById('addPopup');
         const tbody          = document.getElementById('promoTableBody');
         const editPopup      = document.getElementById('editPopup');
+        const deletedPopup = document.getElementById('deleteConfirmPopup');
         document.getElementById('openAddPopup').onclick = () => {
             addPopup.style.display = 'flex';
             document.getElementById('addCode').value = '';
@@ -275,21 +283,21 @@
             document.getElementById('addCategory').value = '';
         };
         document.getElementById('closeAddPopup').onclick = () => addPopup.style.display = 'none';
+        document.getElementById('cancelDeleteBtn').onclick = () => deletedPopup.style.display = 'none';
         window.openEdit = function(code) {
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
             const row = rows.find(r => r.cells[0].textContent.trim() === code);
             if (!row) return alert('Không tìm thấy mã!');
-            document.getElementById('editCode').textContent = row.cells[0].textContent.trim();
-            document.getElementById('editValueDisplay').textContent = row.cells[1].textContent.trim();
-            document.getElementById('editTypeDisplay').textContent = row.cells[2].textContent.trim();
-            document.getElementById('editApplyDisplay').textContent = 'Toàn bộ sản phẩm';
+            document.getElementById('editCode').value = row.cells[0].textContent.trim();
+            document.getElementById('editValueDisplay').value = row.cells[1].textContent.trim();
+            document.getElementById('editTypeDisplay').value = row.cells[2].textContent.trim();
+            document.getElementById('editApplyDisplay').value = row.cells[3].textContent.trim();
             const minOrder = row.cells[4].textContent.replace(/[^\d]/g, '');
             document.getElementById('editMinOrder').value = minOrder || 0;
             const usage = row.cells[3].textContent.trim();
             const maxUsage = usage.split('/')[1]?.trim() || '100';
             document.getElementById('editMaxUsage').value = maxUsage.replace(/\D/g, '');
-            const [d, m, y] = row.cells[5].textContent.trim().split('/');
-            document.getElementById('editEnd').value = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            document.getElementById('editEnd').value ='';
             document.getElementById('editSingleUse').checked = false;
             document.getElementById('editStart').value = '';
             editPopup.style.display = 'flex';

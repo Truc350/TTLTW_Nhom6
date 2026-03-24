@@ -44,7 +44,7 @@ public class VoucherServlet extends HttpServlet {
         int used_count =0;
 
         String category = request.getParameter("cate");
-        if (!scope.equalsIgnoreCase("all")) {
+        if (!scope.equalsIgnoreCase("Tất cả")) {
             scope = category;
         }
 

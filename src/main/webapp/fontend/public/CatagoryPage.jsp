@@ -18,8 +18,8 @@
     <script src="${pageContext.request.contextPath}/js/category.js"></script>
 
     <style>
-        .slider-viewport{
-            margin : 0;
+        .slider-viewport {
+            margin: 0;
 
         }
 
@@ -166,7 +166,7 @@
             <h1>${selectedCategory.nameCategories}</h1>
 
             <div id="sum-items">
-                <p><strong>Tổng sản phẩm hiển thị:</strong> ${comicList.size()}</p>
+                <p><strong>Tổng sản phẩm hiển thị:</strong> ${totalComics}</p>
             </div>
             <section aria-label="Danh sách sản phẩm ${selectedCategory.nameCategories}">
 
@@ -197,10 +197,12 @@
                                             <c:choose>
                                                 <c:when test="${comic.hasFlashSale}">
                                                     <p class="product-price flash">
-                                                        <fmt:formatNumber value="${comic.flashSalePrice}" pattern="#,###"/> đ
+                                                        <fmt:formatNumber value="${comic.flashSalePrice}"
+                                                                          pattern="#,###"/> đ
                                                     </p>
                                                     <p class="original-price-small">
-                                                        <s><fmt:formatNumber value="${comic.price}" pattern="#,###"/> đ</s>
+                                                        <s><fmt:formatNumber value="${comic.price}" pattern="#,###"/>
+                                                            đ</s>
                                                         <span class="discount-badge-small flash">
                                                 -<fmt:formatNumber value="${comic.flashSaleDiscount}" pattern="#"/>%
                                             </span>
@@ -214,7 +216,8 @@
                                             </c:choose>
                                             <c:choose>
                                                 <c:when test="${comic.stockQuantity > 0}">
-                                                    <p class="sold">Còn hàng: <strong>${comic.stockQuantity}</strong></p>
+                                                    <p class="sold">Còn hàng: <strong>${comic.stockQuantity}</strong>
+                                                    </p>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <p class="sold out-of-stock">Hết hàng</p>
@@ -229,10 +232,57 @@
                 </c:choose>
 
             </section>
-            <div class="panigation"></div>
-
-
+            <div class="pagination">
+                <c:if test="${totalPages > 1}">
+                    <c:choose>
+                        <c:when test="${currentPage > 1}">
+                            <a class="page-btn"
+                               href="${pageContext.request.contextPath}/category?id=${selectedCategory.id}&page=${currentPage - 1}<c:forEach var="p" items="${selectedPrices}">&price=${p}</c:forEach><c:forEach var="a" items="${selectedAuthors}">&author=${a}</c:forEach><c:forEach var="pub" items="${selectedPublishers}">&publisher=${pub}</c:forEach><c:forEach var="y" items="${selectedYears}">&year=${y}</c:forEach>">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+                        </c:otherwise>
+                    </c:choose>
+                    <c:forEach var="i" begin="1" end="${totalPages}">
+                        <c:choose>
+                            <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
+                                <c:choose>
+                                    <c:when test="${i == currentPage}">
+                                        <span class="page-btn active">${i}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a class="page-btn"
+                                           href="${pageContext.request.contextPath}/category?id=${selectedCategory.id}&page=${i}<c:forEach var="p" items="${selectedPrices}">&price=${p}</c:forEach><c:forEach var="a" items="${selectedAuthors}">&author=${a}</c:forEach><c:forEach var="pub" items="${selectedPublishers}">&publisher=${pub}</c:forEach><c:forEach var="y" items="${selectedYears}">&year=${y}</c:forEach>">
+                                                ${i}
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:when test="${i == currentPage - 3 && currentPage > 4}">
+                                <span class="page-btn dots">...</span>
+                            </c:when>
+                            <c:when test="${i == currentPage + 3 && currentPage < totalPages - 3}">
+                                <span class="page-btn dots">...</span>
+                            </c:when>
+                        </c:choose>
+                    </c:forEach>
+                    <c:choose>
+                        <c:when test="${currentPage < totalPages}">
+                            <a class="page-btn"
+                               href="${pageContext.request.contextPath}/category?id=${selectedCategory.id}&page=${currentPage + 1}<c:forEach var="p" items="${selectedPrices}">&price=${p}</c:forEach><c:forEach var="a" items="${selectedAuthors}">&author=${a}</c:forEach><c:forEach var="pub" items="${selectedPublishers}">&publisher=${pub}</c:forEach><c:forEach var="y" items="${selectedYears}">&year=${y}</c:forEach>">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+                        </c:otherwise>
+                    </c:choose>
+                </c:if>
+            </div>
         </div>
+
 
     </div>
     <c:if test="${not empty recommendations}">
@@ -280,10 +330,12 @@
                                                 <c:choose>
                                                     <c:when test="${comic.hasFlashSale}">
                                                         <p class="product-price flash">
-                                                            <fmt:formatNumber value="${comic.flashSalePrice}" pattern="#,###"/> đ
+                                                            <fmt:formatNumber value="${comic.flashSalePrice}"
+                                                                              pattern="#,###"/> đ
                                                         </p>
                                                         <p class="original-price-slider">
-                                                            <s><fmt:formatNumber value="${comic.price}" pattern="#,###"/> đ</s>
+                                                            <s><fmt:formatNumber value="${comic.price}"
+                                                                                 pattern="#,###"/> đ</s>
                                                             <span class="discount-tag-slider">
                                                     -<fmt:formatNumber value="${comic.flashSaleDiscount}" pattern="#"/>%
                                                 </span>
@@ -298,7 +350,8 @@
 
                                                 <c:choose>
                                                     <c:when test="${comic.stockQuantity > 0}">
-                                                        <p class="sold">Còn hàng: <strong>${comic.stockQuantity}</strong></p>
+                                                        <p class="sold">Còn hàng:
+                                                            <strong>${comic.stockQuantity}</strong></p>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <p class="sold out-of-stock">Hết hàng</p>
@@ -319,20 +372,19 @@
     </c:if>
 
 
-
-
-
 </div>
-<jsp:include page="/fontend/public/Footer.jsp" />
+<jsp:include page="/fontend/public/Footer.jsp"/>
 
 <style>
     .out-of-stock {
         color: #d32f2f !important;
         font-weight: bold;
     }
+
     section[aria-label] article img {
         background-color: #f5f5f5;
     }
+
     .recommendation-section {
         margin-bottom: 30px;
     }
@@ -350,6 +402,7 @@
     .recommendation-title i {
         font-size: 18px;
     }
+
     .product-item a {
         text-decoration: none;
         color: inherit;

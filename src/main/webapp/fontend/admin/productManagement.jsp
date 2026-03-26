@@ -74,7 +74,7 @@
                         <div class="form-group">
                             <label>Tên truyện: <span style="color: red;">*</span></label>
                             <input type="text" name="nameComics" required>
-                        </div
+                        </div>
                         <div class="form-group">
                             <label>Bộ truyện:</label>
                             <select name="seriesId">

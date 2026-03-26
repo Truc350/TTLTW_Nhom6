@@ -87,7 +87,10 @@ public class VNPayReturnServlet extends HttpServlet {
                 }
             }
             double subtotal = (Double) session.getAttribute("checkoutSubtotal");
-            double shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            Object shippingFeeObj = session.getAttribute("pending_shippingFee");
+            double shippingFee = (shippingFeeObj != null)
+                    ? ((Number) shippingFeeObj).doubleValue()
+                    : ("express".equals(shippingMethod) ? 50000 : 25000);
 
             int pointsToUse = 0;
             double pointsDiscount = 0;
@@ -223,7 +226,7 @@ public class VNPayReturnServlet extends HttpServlet {
             session.setAttribute("orderSuccess",
                     "Đặt hàng thành công! Mã giao dịch VNPay: " + transactionNo);
 
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/order-success");
         } catch (RuntimeException e) {
             e.printStackTrace();
             session.setAttribute("orderError", e.getMessage());

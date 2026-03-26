@@ -27,16 +27,18 @@
                 </c:if>
 
                 <label>Nhập Email hoặc Tên đăng nhập:</label>
-                <input id="username" placeholder="Email hoặc tên đăng nhập" name="username">
-
+                <input type="text" id="username" placeholder="Email hoặc tên đăng nhập" name="username" maxlength="100"
+                       autocomplete="username">
+                <span id="usernameHint" class="hint"></span>
                 <label>Nhập mật khẩu:</label>
                 <div class="password-box">
-                    <input id="password" type="password" placeholder="Mật khẩu" name="password">
+                    <input id="password" type="password" placeholder="Mật khẩu" name="password" maxlength="100"
+                           autocomplete="current-password">
                     <span class="eye">
                     <img src="${pageContext.request.contextPath}/img/eyePassword.png" id="toggleEye" alt="eye">
                 </span>
                 </div>
-
+                <span id="passwordHint" class="hint"></span>
                 <div class="links">
                     <a href="${pageContext.request.contextPath}/RegisterServlet">Đăng ký tài khoản</a>
                     <a href="${pageContext.request.contextPath}/forgot-password">Quên mật khẩu</a>
@@ -90,30 +92,44 @@
     const facebookBtn = document.getElementById("facebookLogin");
     if (facebookBtn) {
         facebookBtn.addEventListener("click", () => {
-            window.location.href = "https://www.facebook.com/v18.0/dialog/oauth?client_id=4112997315630876&redirect_uri=http://localhost:8080/LTW_Nhom5/login-facebook-callback&scope=email,public_profile";
+            window.location.href = "https://www.facebook.com/v18.0/dialog/oauth?client_id=4112997315630876&redirect_uri=http://localhost:8080/TTLTW_Nhom6/login-facebook-callback&scope=email,public_profile";
         });
     }
 </script>
 <script>
     function validateLogin() {
         const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
+        const password = document.getElementById("password").value;
         const errorBox = document.getElementById("clientError");
 
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
         errorBox.style.display = "none";
         errorBox.innerText = "";
 
-        if (username === "" || password === "") {
-            showError("Vui lòng nhập đầy đủ tài khoản và mật khẩu");
+        if (username === "") {
+            showError("Vui lòng nhập email hoặc tên đăng nhập");
+            document.getElementById("username").focus();
             return false;
         }
-
-        if (!passwordRegex.test(password)) {
-            showError("Mật khẩu phải hơn 8 ký tự, gồm chữ hoa, chữ thường và ký tự đặc biệt");
+        if (password === "") {
+            showError("Vui lòng nhập mật khẩu");
+            document.getElementById("password").focus();
             return false;
         }
-
+        if (username.length < 3) {
+            showError("Tên đăng nhập phải có ít nhất 3 ký tự");
+            return false;
+        }
+        if (username.includes("@")) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(username)) {
+                showError("Địa chỉ email không hợp lệ");
+                return false;
+            }
+        }
+        if (password.length < 8) {
+            showError("Mật khẩu phải có ít nhất 8 ký tự");
+            return false;
+        }
         return true;
     }
 
@@ -130,15 +146,99 @@
 
 </script>
 <script>
-    document.getElementById("username").addEventListener("input", clearErrors);
-    document.getElementById("password").addEventListener("input", clearErrors);
 
-    function clearErrors() {
-        const clientError = document.getElementById("clientError");
+    const usernameInput = document.getElementById("username");
+    const passwordInput2 = document.getElementById("password");
+
+    usernameInput.addEventListener("input", function () {
+        const val = this.value.trim();
+        const hint = document.getElementById("usernameHint");
+
+        if (val === "") {
+            setInputState(this, hint, null, "");
+            return;
+        }
+
+        if (val.length < 3) {
+            setInputState(this, hint, false, "Tên đăng nhập phải có ít nhất 3 ký tự");
+            return;
+        }
+
+        // Nếu có @  validate email
+        if (val.includes("@")&& val.indexOf("@") < val.lastIndexOf(".")) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(val)) {
+                setInputState(this, hint, false, "Địa chỉ email không hợp lệ");
+            } else {
+                setInputState(this, hint, true, "");
+            }
+            return;
+        }
+
+        const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+        if (!usernameRegex.test(val)) {
+            setInputState(this, hint, false, "Tên đăng nhập không được chứa ký tự đặc biệt");
+        } else {
+            setInputState(this, hint, true, "");
+        }
+    });
+
+    passwordInput2.addEventListener("input", function () {
+        const val = this.value;
+        const hint = document.getElementById("passwordHint");
+
+        if (val === "") {
+            setInputState(this, hint, null, "");
+            return;
+        }
+
+        if (val.length < 8) {
+            setInputState(this, hint, false, `Mật khẩu phải có ít nhất 8 ký tự (cần thêm ${8 - val.length} ký tự)`);
+            return;
+        }
+
+        const hasUpper = /[A-Z]/.test(val);
+        const hasLower = /[a-z]/.test(val);
+        const hasSpecial = /[\W_]/.test(val);
+
+        if (!hasUpper || !hasLower || !hasSpecial) {
+            let missing = [];
+            if (!hasUpper) missing.push("chữ hoa");
+            if (!hasLower) missing.push("chữ thường");
+            if (!hasSpecial) missing.push("ký tự đặc biệt");
+            setInputState(this, hint, false, `Mật khẩu phải có: ${missing.join(", ")}`);
+            return;
+        }
+
+        setInputState(this, hint, true, "");
+    });
+
+    //Xóa lỗi server khi bắt đầu gõ
+    usernameInput.addEventListener("input", clearServerError);
+    passwordInput2.addEventListener("input", clearServerError);
+
+    function clearServerError() {
         const serverError = document.getElementById("serverError");
-
-        if (clientError) clientError.style.display = "none";
+        const clientError = document.getElementById("clientError");
         if (serverError) serverError.style.display = "none";
+        if (clientError) clientError.style.display = "none";
+    }
+    function setInputState(inputEl, hintEl, valid, message) {
+        inputEl.classList.remove("valid", "invalid");
+        hintEl.classList.remove("error", "success");
+        hintEl.innerText = message;
+
+        if (valid === true) {
+            inputEl.classList.add("valid");
+            hintEl.classList.add("success");
+        } else if (valid === false) {
+            inputEl.classList.add("invalid");
+            hintEl.classList.add("error");
+        } else {
+            hintEl.style.display = "none";
+            return;
+        }
+        hintEl.style.display = "block";
     }
 </script>
 

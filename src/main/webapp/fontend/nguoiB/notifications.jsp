@@ -39,7 +39,18 @@
 <jsp:include page="/fontend/public/Footer.jsp"/>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type') || 'ALL';
+
+        document.querySelectorAll('.notification-container .tab').forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.dataset.type === typeParam) {
+                tab.classList.add('active');
+            }
+        });
+
         loadNotifications();
+
         document.querySelectorAll('.notification-container .tab').forEach(tab => {
             tab.addEventListener('click', function () {
                 document.querySelectorAll('.notification-container .tab').forEach(t =>
@@ -147,6 +158,14 @@
                 credentials: 'include'
             });
             loadNotifications();
+
+            const badge = document.getElementById('notification-badge');
+            if (badge) {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            }
+            const badgeCount = document.getElementById('header-badge-count');
+            if (badgeCount) badgeCount.textContent = '(0)';
         } catch (err) {
             showToastUser('Lỗi thực hiện', 'error');
         }

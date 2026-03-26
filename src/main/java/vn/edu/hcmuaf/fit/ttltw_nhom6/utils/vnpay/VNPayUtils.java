@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class VNPayUtils {
-    public static final String VNP_TMN_CODE = "JQP2H1FD";
-    public static final String VNP_HASH_SECRET = "PSRIWGYCL6C0XAMWPIRDQXZAN8AYCRA2";
+    public static final String VNP_TMN_CODE = "PRKE87PB";
+    public static final String VNP_HASH_SECRET = "4X9G4D9M04WW2I7WICWIZ7DZS4V1G3MF";
     public static final String VNP_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static final String VNP_VERSION = "2.1.0";
     public static final String VNP_COMMAND = "pay";
@@ -41,6 +41,7 @@ public class VNPayUtils {
         StringBuilder hashData = new StringBuilder();
         StringBuilder queryString = new StringBuilder();
         boolean first = true;
+
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -49,12 +50,16 @@ public class VNPayUtils {
                     hashData.append('&');
                     queryString.append('&');
                 }
-                hashData.append(key).append('=').append(value);
+                hashData.append(URLEncoder.encode(key, StandardCharsets.US_ASCII))
+                        .append('=')
+                        .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
                 queryString.append(URLEncoder.encode(key, StandardCharsets.US_ASCII))
-                        .append("=").append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
+                        .append("=")
+                        .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
                 first = false;
             }
         }
+
         String secureHash = hmacSHA512(VNP_HASH_SECRET, hashData.toString());
         queryString.append("&vnp_SecureHash=").append(secureHash);
 
@@ -66,7 +71,6 @@ public class VNPayUtils {
         String vnpSecureHash = getParam(params, "vnp_SecureHash");
         if (vnpSecureHash == null) return false;
 
-        // Lọc bỏ các param không dùng để hash
         Map<String, String> signParams = new TreeMap<>();
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
             String key = entry.getKey();
@@ -79,7 +83,10 @@ public class VNPayUtils {
         boolean first = true;
         for (Map.Entry<String, String> entry : signParams.entrySet()) {
             if (!first) hashData.append('&');
-            hashData.append(entry.getKey()).append('=').append(entry.getValue());
+            // Encode giống hệt lúc tạo URL
+            hashData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII))
+                    .append('=')
+                    .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
             first = false;
         }
 

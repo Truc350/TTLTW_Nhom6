@@ -412,7 +412,7 @@
 
                     const formattedTime = n.formatted_date || '';
 
-                    html += '<div class="header-noti-item ' + unreadClass + '" data-id="' + n.id + '">'
+                    html += '<div class="header-noti-item ' + unreadClass + '" data-id="' + n.id + '" data-type="' + (n.type || '') + '">'
                         + '<div class="noti-icon">' + '</div>'
                         + '<div class="noti-content">'
                         + '<div class="noti-message">' + displayMessage + '</div>'
@@ -425,6 +425,12 @@
                 document.querySelectorAll('.header-noti-item').forEach(item => {
                     item.addEventListener('click', async function () {
                         const id = this.dataset.id;
+                        const type = this.dataset.type || '';
+
+                        let tabType = 'ALL';
+                        if (type.startsWith('ORDER')) tabType = 'ORDER';
+                        else if (type === 'PROMOTION') tabType = 'EVENT';
+
                         try {
                             await fetch('${pageContext.request.contextPath}/NotificationServlet/mark-read?id=' + id, {
                                 method: 'POST'
@@ -432,7 +438,7 @@
                         } catch (err) {
                             console.error('Lỗi đánh dấu đã đọc:', err);
                         }
-                        window.location.href = '${pageContext.request.contextPath}/fontend/nguoiB/notifications.jsp#noti-' + id;
+                        window.location.href = '${pageContext.request.contextPath}/fontend/nguoiB/notifications.jsp?type=' + tabType + '#noti-' + id;
                     });
                 });
 

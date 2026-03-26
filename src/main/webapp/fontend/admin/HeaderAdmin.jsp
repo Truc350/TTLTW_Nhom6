@@ -15,9 +15,9 @@
 </c:if>
 <header class="admin-header">
     <div class="header-right">
-        <a href="${pageContext.request.contextPath}/fontend/admin/chatWithCus.jsp">
-            <i class="fa-solid fa-comment"></i>
-        </a>
+<%--        <a href="${pageContext.request.contextPath}/fontend/admin/chatWithCus.jsp">--%>
+<%--            <i class="fa-solid fa-comment"></i>--%>
+<%--        </a>--%>
         <div class="admin-notification">
             <a href="javascript:void(0)" onclick="toggleNotificationDropdown()">
                 <i class="fa-regular fa-bell"></i>
@@ -117,7 +117,5 @@
         }
     }
 </script>
-
-
 
 

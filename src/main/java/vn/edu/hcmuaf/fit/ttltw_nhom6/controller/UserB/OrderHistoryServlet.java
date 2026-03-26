@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ComicDAO;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.OrderDAO;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ReviewDAO;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.*;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Order;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.OrderItem;
@@ -26,6 +23,7 @@ public class OrderHistoryServlet extends HttpServlet {
     private ComicDAO comicDAO;
     private ReviewDAO reviewDAO;
     private FlashSaleComicsDAO flashSaleComicsDAO;
+    private UserDao userDAO;
 
     @Override
     public void init() throws ServletException {
@@ -33,6 +31,7 @@ public class OrderHistoryServlet extends HttpServlet {
         comicDAO = new ComicDAO();
         reviewDAO = new ReviewDAO();
         flashSaleComicsDAO = new FlashSaleComicsDAO();
+        userDAO = UserDao.getInstance();
     }
 
     @Override
@@ -174,7 +173,22 @@ public class OrderHistoryServlet extends HttpServlet {
 
                 case "receive":
                     success = orderDAO.updateOrderStatusWithPoints(orderId, "Completed");
-                    message = success ? "Đã xác nhận nhận hàng" : "Không thể cập nhật";
+                    if (success) {
+                        User updatedUser = userDAO.getUserById(user.getId());
+                        if (updatedUser != null) {
+                            session.setAttribute("currentUser", updatedUser);
+                            int pointsEarned = Math.max(updatedUser.getPoints() - user.getPoints(), 0);
+                            response.getWriter().write(String.format(
+                                    "{\"success\":true,\"message\":\"Đã xác nhận nhận hàng\"," +
+                                            "\"newPoints\":%d,\"pointsEarned\":%d}",
+                                    updatedUser.getPoints(), pointsEarned
+                            ));
+                            return;
+                        }
+                        message = "Đã xác nhận nhận hàng";
+                    } else {
+                        message = "Không thể cập nhật";
+                    }
                     break;
 
                 case "return":

@@ -1,4 +1,4 @@
-package vn.edu.hcmuaf.fit.ttltw_nhom6.controller.admin;
+package vn.edu.hcmuaf.fit.ttltw_nhom6.controller.admin.voucher;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -44,7 +44,7 @@ public class VoucherServlet extends HttpServlet {
         int used_count =0;
 
         String category = request.getParameter("cate");
-        if (!scope.equalsIgnoreCase("all")) {
+        if (!scope.equalsIgnoreCase("Tất cả")) {
             scope = category;
         }
 
@@ -65,11 +65,5 @@ public class VoucherServlet extends HttpServlet {
             request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
         }
 
-//        boolean isSuccess = voucherDao.addVoucher(voucher);
-//        if (isSuccess) {
-//            System.out.println("Successfully added voucher");
-//        }
-//
-//        response.sendRedirect(request.getContextPath() + "/admin/vouchersManagement");
     }
 }

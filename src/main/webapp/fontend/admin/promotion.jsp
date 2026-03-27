@@ -1,3 +1,4 @@
+<%--<jsp:useBean id="name" scope="request" type="vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category"/>--%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -36,12 +37,15 @@
             <table class="promo-table">
                 <thead>
                 <tr>
-                    <th>Mã giảm giá</th>
+                    <th>Mã</th>
                     <th>Giá trị</th>
                     <th>Áp dụng</th>
-                    <th>Đã dùng/Tổng</th>
-                    <th>Đơn tối thiểu</th>
-                    <th>Hạn sử dụng</th>
+                    <th>Thể loại</th>
+                    <th>Dùng/Tổng</th>
+                    <th>Giá tối thiểu</th>
+                    <th>Lần dùng</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
                     <th>Trạng thái</th>
                     <th></th>
                 </tr>
@@ -53,8 +57,20 @@
                         <td>${voucher.code}</td>
                         <td>${voucher.discountValue}</td>
                         <td>${voucher.discountTarget}</td>
+                        <td>${voucher.applyScope}</td>
                         <td>${voucher.usedCount}/${voucher.quantity}</td>
                         <td>${voucher.minOrderAmount}</td>
+
+                        <c:choose>
+                            <c:when test="${voucher.singleUse}">
+                                <td>Một lần</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td>Nhiều lần</td>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <td>${voucher.startDate}</td>
                         <td>${voucher.endDate}</td>
 
                         <c:choose>
@@ -72,7 +88,9 @@
 
                         <td>
                             <button class="edit-btn" onclick="openEdit('${voucher.code}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
+                            <button class="delete-btn" onclick="openDeletePopup('${voucher.code}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 </c:forEach>
@@ -106,7 +124,7 @@
                 </div>
                 <div>
                     <label>Áp dụng</label>
-                    <select id="addType" name="discount_target"  required>
+                    <select id="addTarget" name="discount_target"  required>
                         <option value="Vận chuyển">Vận chuyển</option>
                         <option value="Giảm giá">Giảm giá</option>
                     </select>
@@ -138,7 +156,7 @@
                 <div>
                     <label>Áp dụng</label>
                     <select id="addApply" name="apply_scope">
-                        <option value="all">Toàn bộ sản phẩm</option>
+                        <option value="Tất cả">Toàn bộ sản phẩm</option>
                         <option value="category">Một thể loại</option>
                     </select>
                 </div>
@@ -150,19 +168,9 @@
                 </div>
 
                 <!-- Chọn thể loại (ẩn mặc định) -->
-                <div id="addCategoryBox" style="grid-column: 1 / -1;">
-                    <label>Thể loại</label>
-                    <select id="addCategory" name="cate" disabled>
-                        <option value="">-- Chọn thể loại --</option>
-                        <option>Trinh thám</option>
-                        <option>Hài hước</option>
-                        <option>Ngôn tình</option>
-                        <option>Hành động</option>
-                        <option>Kinh dị</option>
-                        <option>Phiêu lưu</option>
-                        <option>Học đường</option>
-                        <option>Giả tưởng</option>
-                    </select>
+                <div id="addCategoryBox" style="grid-column: 1 / -1;  display: none;">
+                    <label for="addCategory" >Thể loại</label>
+                    <select id="addCategory" name="cate" disabled>  </select>
                 </div>
 
                 <!-- Ngày bắt đầu + kết thúc -->
@@ -179,72 +187,80 @@
             </div>
 
             <div class="btn-row">
-                <button type="submit" class="btn-cancel" id="closeAddPopup">Hủy</button>
+                <button class="btn-cancel" id="closeAddPopup">Hủy</button>
                 <button type="submit" class="btn-save" id="saveAddBtn">Tạo mã</button>
             </div>
         </form>
     </div>
 </div>
 <div class="popup-overlay" id="editPopup">
-    <div class="popup-box">
-        <h3>Sửa mã khuyến mãi</h3>
-        <div class="popup-grid">
-            <div>
-                <label>Tên mã</label>
-                <p id="editCode" class="readonly"></p>
-            </div>
-            <div>
-                <label>Loại giảm giá</label>
-                <p id="editTypeDisplay" class="readonly"></p>
-            </div>
-            <div>
-                <label>Giá trị giảm</label>
-                <p id="editValueDisplay" class="readonly"></p>
-            </div>
-            <div>
-                <label>Áp dụng cho</label>
-                <p id="editApplyDisplay" class="readonly">Toàn bộ sản phẩm</p>
-            </div>
-            <div>
-                <label>Đơn tối thiểu</label>
-                <input type="number" id="editMinOrder" min="0" placeholder="0">
-            </div>
-            <div>
-                <label>Số lượng tối đa</label>
-                <input type="number" id="editMaxUsage" min="1">
-            </div>
-            <div class="checkbox-row">
-                <input type="checkbox" id="editSingleUse">
-                <label for="editSingleUse">Mỗi khách chỉ dùng được 1 lần</label>
-            </div>
-            <div class="date-row">
+    <form action="${pageContext.request.contextPath}/admin/editVoucher" method="POST" >
+        <div class="popup-box">
+            <h3>Sửa mã khuyến mãi</h3>
+            <div class="popup-grid">
                 <div>
-                    <label>Từ ngày</label>
-                    <input type="date" id="editStart">
+                    <label>Tên mã</label>
+                    <input type= 'text'  id="editCode"  name="code" class="readonly">
                 </div>
                 <div>
-                    <label>Đến ngày</label>
-                    <input type="date" id="editEnd">
+                    <label>Loại giảm giá</label>
+                    <input type= 'text'id="editTypeDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Giá trị giảm</label>
+                    <input type= 'text'  id="editValueDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Áp dụng cho</label>
+                    <input type= 'text' id="editApplyDisplay"  name="" class="readonly">
+                </div>
+                <div>
+                    <label>Đơn tối thiểu</label>
+                    <input type="number" id="editMinOrder" min="0"  name="minOrder" placeholder="0">
+                </div>
+                <div>
+                    <label>Số lượng tối đa</label>
+                    <input type="number" id="editMaxUsage"  name="quantity" min="1">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="editSingleUse"  name="">
+                    <label for="editSingleUse">Mỗi khách chỉ dùng được 1 lần</label>
+                </div>
+                <div class="date-row">
+                    <div>
+                        <label>Từ ngày</label>
+                        <input type="datetime-local" id="editStart"  name="startDate">
+                    </div>
+                    <div>
+                        <label>Đến ngày</label>
+                        <input type="datetime-local" id="editEnd" name="endDate">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="btn-row">
-            <button class="btn-cancel" id="closeEditPopup">Hủy</button>
-            <button class="btn-save" id="saveEditBtn">Cập nhật</button>
+            <div class="btn-row">
+                <button class="btn-cancel" id="closeEditPopup" type="button">Hủy</button>
+                <button class="btn-save" id="saveEditBtn"type="submit">Cập nhật</button>
+            </div>
         </div>
-    </div>
+    </form>
+
 </div>
 <div class="popup-overlay" id="deleteConfirmPopup">
-    <div class="popup-box small">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h3>Xác nhận xóa</h3>
-        <p>Bạn có chắc muốn xóa mã này không?<br></p>
-        <div class="btn-row">
-            <button class="btn-cancel" id="cancelDeleteBtn">Không</button>
-            <button class="btn-save" id="confirmDeleteBtn">Có</button>
+    <form  action="${pageContext.request.contextPath}/admin/deleteVoucher" method="POST">
+
+        <input type="hidden" name="deleted-code" id="deleteCode">
+
+        <div class="popup-box small">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Xác nhận xóa</h3>
+            <p>Bạn có chắc muốn xóa mã <b id="deleteVoucherCode"></b> này không?</p>
+            <div class="btn-row">
+                <button class="btn-cancel" id="cancelDeleteBtn" type ="button">Không</button>
+                <button class="btn-save" id="confirmDeleteBtn" type="submit">Có</button>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <c:if test = "${not empty message}" >
@@ -260,28 +276,9 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const addPopup       = document.getElementById('addPopup');
-        const addApply       = document.getElementById('addApply');
-        const addCategoryBox = document.getElementById('addCategoryBox');
         const tbody          = document.getElementById('promoTableBody');
         const editPopup      = document.getElementById('editPopup');
-        const deletePopup    = document.getElementById('deleteConfirmPopup');
-        const toggleCategory = () => {
-            addCategoryBox.classList.toggle('hide', addApply.value !== 'category');
-        };
-        // Gắn event change
-        addApply.addEventListener('change', () => {
-            const categorySelect = document.getElementById('addCategory');
-            if (addApply.value === 'category') {
-                categorySelect.disabled = false;
-                categorySelect.style.opacity = '1';
-                categorySelect.style.pointerEvents = 'auto';
-            } else {
-                categorySelect.disabled = true;
-                categorySelect.style.opacity = '0.5';
-                categorySelect.style.pointerEvents = 'none';
-                categorySelect.value = ''; // xóa lựa chọn cũ
-            }
-        });
+        const deletedPopup = document.getElementById('deleteConfirmPopup');
         document.getElementById('openAddPopup').onclick = () => {
             addPopup.style.display = 'flex';
             document.getElementById('addCode').value = '';
@@ -292,80 +289,33 @@
             document.getElementById('addSingleUse').checked = false;
             document.getElementById('addStart').value = '';
             document.getElementById('addEnd').value = '';
-            addApply.value = 'all';
+            document.getElementById('addCategoryBox').style.display = 'none';
             document.getElementById('addCategory').disabled = true;
-            document.getElementById('addCategory').style.opacity = '0.5';
             document.getElementById('addCategory').value = '';
         };
         document.getElementById('closeAddPopup').onclick = () => addPopup.style.display = 'none';
-        // document.getElementById('saveAddBtn').onclick = () => {
-        //     const code = document.getElementById('addCode').value.trim();
-        //     const type = document.getElementById('addType').value;
-        //     const value = document.getElementById('addValue').value;
-        //     if (!code || !type || !value) {
-        //         alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
-        //         return;
-        //     }
-        //     if (addApply.value === 'category' && !document.getElementById('addCategory').value) {
-        //         alert('Vui lòng chọn thể loại!');
-        //         return;
-        //     }
-        //     alert('Tạo mã thành công!');
-        //     addPopup.style.display = 'none';
-        // };
+        document.getElementById('cancelDeleteBtn').onclick = () => deletedPopup.style.display = 'none';
         window.openEdit = function(code) {
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
             const row = rows.find(r => r.cells[0].textContent.trim() === code);
             if (!row) return alert('Không tìm thấy mã!');
-            document.getElementById('editCode').textContent = row.cells[0].textContent.trim();
-            document.getElementById('editValueDisplay').textContent = row.cells[1].textContent.trim();
-            document.getElementById('editTypeDisplay').textContent = row.cells[2].textContent.trim();
-            document.getElementById('editApplyDisplay').textContent = 'Toàn bộ sản phẩm';
+            document.getElementById('editCode').value = row.cells[0].textContent.trim();
+            document.getElementById('editValueDisplay').value = row.cells[1].textContent.trim();
+            document.getElementById('editTypeDisplay').value = row.cells[2].textContent.trim();
+            document.getElementById('editApplyDisplay').value = row.cells[3].textContent.trim();
             const minOrder = row.cells[4].textContent.replace(/[^\d]/g, '');
             document.getElementById('editMinOrder').value = minOrder || 0;
             const usage = row.cells[3].textContent.trim();
             const maxUsage = usage.split('/')[1]?.trim() || '100';
             document.getElementById('editMaxUsage').value = maxUsage.replace(/\D/g, '');
-            const [d, m, y] = row.cells[5].textContent.trim().split('/');
-            document.getElementById('editEnd').value = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            document.getElementById('editEnd').value = row.cells[8].textContent.trim();
             document.getElementById('editSingleUse').checked = false;
-            document.getElementById('editStart').value = '';
+            document.getElementById('editStart').value =  row.cells[7].textContent.trim();
             editPopup.style.display = 'flex';
         };
         document.getElementById('closeEditPopup').onclick = () => editPopup.style.display = 'none';
-        document.getElementById('saveEditBtn').onclick = () => {
-            alert('Cập nhật thành công!');
-            editPopup.style.display = 'none';
-        };
-        tbody.addEventListener('click', e => {
-            if (e.target.closest('.delete-btn')) deletePopup.style.display = 'flex';
-        });
-        document.getElementById('cancelDeleteBtn').onclick = () => deletePopup.style.display = 'none';
-        document.getElementById('confirmDeleteBtn').onclick = () => {
-            alert('Đã xóa mã!');
-            deletePopup.style.display = 'none';
-        };
-        [addPopup, editPopup, deletePopup].forEach(p => {
-            p.addEventListener('click', e => e.target === p && (p.style.display = 'none'));
-        });
-        const ROWS_PER_PAGE = 5;
-        const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
-        document.querySelectorAll('.pro-page').forEach(btn => {
-            btn.onclick = () => {
-                const page = +btn.dataset.page;
-                rows.forEach((row, i) => {
-                    row.style.display = (i >= (page-1)*ROWS_PER_PAGE && i < page*ROWS_PER_PAGE) ? '' : 'none';
-                });
-                document.querySelectorAll('.pro-page').forEach(b => b.classList.toggle('active', +b.dataset.page === page));
-            };
-        });
-        document.querySelector('.pro-page[data-page="1"]')?.click();
-        const currentPage = window.location.pathname.split("/").pop();
-        document.querySelectorAll(".sidebar a").forEach(link => {
-            if (link.getAttribute("href") === currentPage) {
-                link.classList.add("active");
-            }
-        });
+
+
     });
 </script>
 <script>
@@ -408,13 +358,43 @@
 
 
 <script>
+    document.getElementById("addApply").addEventListener("change", function () {
+        let value = this.value;
+        let categorySelect = document.getElementById("addCategory");
+        let categoryBox = document.getElementById("addCategoryBox");
+
+        if (value === "category") {
+            categorySelect.disabled = false;
+            categorySelect.style.pointerEvents = 'auto';
+            categoryBox.style.display = 'block';
+
+            fetch("${pageContext.request.contextPath}/admin/loadCategory")
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        categorySelect.appendChild(opt);
+                    });
+                });
+        } else {
+            categorySelect.disabled = true;
+            categorySelect.style.pointerEvents = 'none';
+            categorySelect.value = '';
+            categoryBox.style.display = 'none';
+        }
+    });
+</script>
+
+<script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.querySelector(".popup-box form");
 
         form.addEventListener("submit", function(event) {
             // Lấy giá trị các input
             const code = document.getElementById("addCode").value.trim();
-            const discountTarget = document.getElementById("addType").value;
+            const discountTarget = document.getElementById("addTarget").value;
             const discountType = form.querySelector("select[name='discount_type']").value;
             const discountValue = document.getElementById("addValue").value;
             const minOrder = document.getElementById("addMinOrder").value;
@@ -447,7 +427,16 @@
     });
 </script>
 
+<script>
+    function openDeletePopup(code) {
+        document.getElementById("deleteVoucherCode").textContent = code;
 
+        let input = document.getElementById("deleteCode");
+        if (input) input.value = code;
+
+        document.getElementById("deleteConfirmPopup").style.display = "flex";
+    }
+</script>
 
 </body>
 </html>

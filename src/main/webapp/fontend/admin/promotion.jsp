@@ -43,8 +43,9 @@
                     <th>Thể loại</th>
                     <th>Dùng/Tổng</th>
                     <th>Giá tối thiểu</th>
-                    <th>Ngày bắt đầu</th>
-                    <th>Ngày kết thúc</th>
+                    <th>Lần dùng</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
                     <th>Trạng thái</th>
                     <th></th>
                 </tr>
@@ -59,6 +60,16 @@
                         <td>${voucher.applyScope}</td>
                         <td>${voucher.usedCount}/${voucher.quantity}</td>
                         <td>${voucher.minOrderAmount}</td>
+
+                        <c:choose>
+                            <c:when test="${voucher.singleUse}">
+                                <td>Một lần</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td>Nhiều lần</td>
+                            </c:otherwise>
+                        </c:choose>
+
                         <td>${voucher.startDate}</td>
                         <td>${voucher.endDate}</td>
 
@@ -183,7 +194,7 @@
     </div>
 </div>
 <div class="popup-overlay" id="editPopup">
-    <form action="${pageContext.request.contextPath}/admin/editVoucher" method="GET" >
+    <form action="${pageContext.request.contextPath}/admin/editVoucher" method="POST" >
         <div class="popup-box">
             <h3>Sửa mã khuyến mãi</h3>
             <div class="popup-grid">
@@ -218,11 +229,11 @@
                 <div class="date-row">
                     <div>
                         <label>Từ ngày</label>
-                        <input type="date" id="editStart"  name="">
+                        <input type="datetime-local" id="editStart"  name="startDate">
                     </div>
                     <div>
                         <label>Đến ngày</label>
-                        <input type="date" id="editEnd" name="endDate">
+                        <input type="datetime-local" id="editEnd" name="endDate">
                     </div>
                 </div>
             </div>
@@ -297,34 +308,14 @@
             const usage = row.cells[3].textContent.trim();
             const maxUsage = usage.split('/')[1]?.trim() || '100';
             document.getElementById('editMaxUsage').value = maxUsage.replace(/\D/g, '');
-            document.getElementById('editEnd').value ='';
+            document.getElementById('editEnd').value = row.cells[8].textContent.trim();
             document.getElementById('editSingleUse').checked = false;
-            document.getElementById('editStart').value = '';
+            document.getElementById('editStart').value =  row.cells[7].textContent.trim();
             editPopup.style.display = 'flex';
         };
         document.getElementById('closeEditPopup').onclick = () => editPopup.style.display = 'none';
-        document.getElementById('saveEditBtn').onclick = () => {
-            alert('Cập nhật thành công!');
-            editPopup.style.display = 'none';
-        };
-        const ROWS_PER_PAGE = 5;
-        const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.classList.contains('pagination-row'));
-        document.querySelectorAll('.pro-page').forEach(btn => {
-            btn.onclick = () => {
-                const page = +btn.dataset.page;
-                rows.forEach((row, i) => {
-                    row.style.display = (i >= (page-1)*ROWS_PER_PAGE && i < page*ROWS_PER_PAGE) ? '' : 'none';
-                });
-                document.querySelectorAll('.pro-page').forEach(b => b.classList.toggle('active', +b.dataset.page === page));
-            };
-        });
-        document.querySelector('.pro-page[data-page="1"]')?.click();
-        const currentPage = window.location.pathname.split("/").pop();
-        document.querySelectorAll(".sidebar a").forEach(link => {
-            if (link.getAttribute("href") === currentPage) {
-                link.classList.add("active");
-            }
-        });
+
+
     });
 </script>
 <script>

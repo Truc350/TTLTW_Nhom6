@@ -82,25 +82,27 @@ public class VoucherDao {
                     .list()
                 );
     }
-    public void updateVoucher(String code, BigDecimal minOrderAmount, int quantity,
-                              LocalDateTime endDate, boolean isSingleUse) {
+    public boolean updateVoucher(String code, BigDecimal minOrderAmount, int quantity,
+                              LocalDateTime startDate,  LocalDateTime endDate, boolean isSingleUse) {
 
-        jdbi.useHandle(handle ->
-                handle.createUpdate("""
+        return jdbi.withHandle(handle ->
+               handle.createUpdate("""
             UPDATE vouchers
             SET 
                 min_order_amount = :minOrderAmount,
                 quantity = :quantity,
+                start_date = :startDate,
                 end_date = :endDate,
                 is_single_use = :isSingleUse
             WHERE code = :code
         """)
                         .bind("minOrderAmount", minOrderAmount)
                         .bind("quantity", quantity)
+                        .bind("startDate", startDate)
                         .bind("endDate", endDate)
                         .bind("isSingleUse", isSingleUse)
                         .bind("code", code)
-                        .execute()
+                        .execute() >0
         );
     }
 }

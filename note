@@ -38,3 +38,7 @@ Giữ dữ liệu request	        Có	            Không
 Method	            Dùng khi
 .mapToBean(Class)	map vào object (Category)
 .mapTo(Class)	    map vào kiểu đơn (String, int...)
+
+tinyint này voucher.singleUse thì nó lấy isSingleUse
+            voucher.isSingleUse thì nó lấy getIsSingleUse
+theo javabean

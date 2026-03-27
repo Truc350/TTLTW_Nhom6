@@ -19,21 +19,25 @@ public class editVoucher extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String code = request.getParameter("code");
         BigDecimal minOrder = new BigDecimal(request.getParameter("minOrder"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-        LocalDateTime endDate = LocalDate.parse(request.getParameter("endDate"))
-                .atStartOfDay();
+        LocalDateTime startDate =LocalDateTime.parse(request.getParameter("startDate"));
+        LocalDateTime endDate =LocalDateTime.parse(request.getParameter("endDate"));
 
         boolean isSingleUse = request.getParameter("is_single_use") != null;
 
-        voucherDao.updateVoucher(code, minOrder, quantity, endDate, isSingleUse);
+        boolean isUpdate = voucherDao.updateVoucher(code, minOrder, quantity,startDate, endDate, isSingleUse);
+        request.setAttribute("allVouchers", voucherDao.getAllVouchers());
+        if(isUpdate){
+            request.setAttribute("message", "Đã chỉnh sửa thành công");
+        }else{
+            request.setAttribute("message", "Đã chỉnh sửa thất bại");
+        }
+        request.getRequestDispatcher("/fontend/admin/promotion.jsp")
+                .forward(request, response);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-    }
 }

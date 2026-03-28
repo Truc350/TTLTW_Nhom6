@@ -37,12 +37,12 @@ public class CategoryManagementServlet extends HttpServlet {
             }
 
             request.setAttribute("loadedFromServlet", true);
-            request.getRequestDispatcher("/fontend/admin/category.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/category.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
-            request.getRequestDispatcher("/fontend/admin/category.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/category.jsp").forward(request, response);
         }
     }
 

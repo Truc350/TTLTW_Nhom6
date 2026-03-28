@@ -18,7 +18,7 @@ public class OrderSuccessServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
-        request.getRequestDispatcher("/fontend/nguoiB/orderSuccess.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/orderSuccess.jsp").forward(request, response);
     }
 
     @Override

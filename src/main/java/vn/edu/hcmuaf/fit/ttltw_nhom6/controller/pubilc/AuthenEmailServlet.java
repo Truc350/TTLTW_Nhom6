@@ -31,7 +31,7 @@ public class AuthenEmailServlet extends HttpServlet {
         Optional<User> userOpt = userDao.findByEmail(email);
         if (userOpt.isEmpty()) {
             request.setAttribute("error", "Email không tồn tại trong hệ thống!");
-            request.getRequestDispatcher("/fontend/public/ForgotPass.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/ForgotPass.jsp").forward(request, response);
             return;
         }
 
@@ -47,6 +47,6 @@ public class AuthenEmailServlet extends HttpServlet {
         EmailUtils.sendEmail(email, "Mã xác thực quên mật khẩu", "Mã OTP của bạn là: " + code);
 
         // Quay lại ForgotPass.jsp và bật popup
-        request.getRequestDispatcher("/fontend/public/ForgotPass.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/ForgotPass.jsp").forward(request, response);
     }
 }

@@ -33,7 +33,7 @@ public class WishlistViewServlet extends HttpServlet {
             request.setAttribute("wishlistCount", 0);
         }
 
-        request.getRequestDispatcher("/fontend/nguoiB/wishlist.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/wishlist.jsp").forward(request, response);
     }
 
     @Override

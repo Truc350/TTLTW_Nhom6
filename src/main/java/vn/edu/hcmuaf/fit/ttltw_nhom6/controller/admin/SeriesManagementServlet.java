@@ -111,7 +111,7 @@ public class SeriesManagementServlet extends HttpServlet {
             request.setAttribute("keyword", keyword);
             request.setAttribute("filter", filterParam);
 
-            request.getRequestDispatcher("/fontend/admin/seriesManagement.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/seriesManagement.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

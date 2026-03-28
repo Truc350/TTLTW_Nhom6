@@ -58,7 +58,7 @@ public class SearchServlet extends HttpServlet {
             request.setAttribute("currentPage", 1);
             request.setAttribute("totalPages", 0);
             request.setAttribute("totalComics", 0);
-            request.getRequestDispatcher("/fontend/public/searchResult.jsp")
+            request.getRequestDispatcher("/frontend/public/searchResult.jsp")
                     .forward(request, response);
             return;
         }
@@ -137,7 +137,7 @@ public class SearchServlet extends HttpServlet {
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
 
-        request.getRequestDispatcher("/fontend/public/searchResult.jsp")
+        request.getRequestDispatcher("/frontend/public/searchResult.jsp")
                 .forward(request, response);
     }
 }

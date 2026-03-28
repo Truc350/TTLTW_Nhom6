@@ -70,7 +70,7 @@ public class DashBoardServlet extends HttpServlet {
         request.setAttribute("chartType", getChartType(period));
         request.setAttribute("currentPeriod", period);
 
-        request.getRequestDispatcher("/fontend/admin/dashboard.jsp")
+        request.getRequestDispatcher("/frontend/admin/dashboard.jsp")
                 .forward(request, response);
     }
 

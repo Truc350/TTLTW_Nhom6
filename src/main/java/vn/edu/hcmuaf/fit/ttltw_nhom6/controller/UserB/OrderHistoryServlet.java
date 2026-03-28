@@ -135,7 +135,7 @@ public class OrderHistoryServlet extends HttpServlet {
 
         request.setAttribute("orderDetails", orderDetails);
         request.setAttribute("currentFilter", filter);
-        request.getRequestDispatcher("/fontend/nguoiB/orders.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/orders.jsp").forward(request, response);
     }
 
     @Override

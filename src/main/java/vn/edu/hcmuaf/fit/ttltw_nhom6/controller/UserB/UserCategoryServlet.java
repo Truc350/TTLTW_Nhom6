@@ -139,7 +139,7 @@ public class UserCategoryServlet extends HttpServlet {
         request.setAttribute("recommendations",     recommendations);
         request.setAttribute("isPersonalized",      isPersonalized);
 
-        request.getRequestDispatcher("/fontend/public/CatagoryPage.jsp")
+        request.getRequestDispatcher("/frontend/public/CatagoryPage.jsp")
                 .forward(request, response);
     }
 

@@ -110,7 +110,7 @@ public class SeriesDetailServlet extends HttpServlet {
             request.setAttribute("seriesAuthors", authors);
             request.setAttribute("seriesPublishers", publishers);
 
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/fontend/public/SeriComic.jsp");
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/frontend/public/SeriComic.jsp");
             dispatcher.forward(request, response);
 
         } catch (NumberFormatException e) {

@@ -21,8 +21,7 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-
-@WebServlet({"/home"})
+@WebServlet({ "/home"})
 public class HomeServlet extends HttpServlet {
     private ComicDAO comicDAO;
     private FlashSaleDAO flashSaleDAO;
@@ -112,14 +111,14 @@ public class HomeServlet extends HttpServlet {
 
             List<Comic> topComics = comicDAO.getTop5BestSellerThisWeek();
             request.setAttribute("topComics", topComics);
-            request.getRequestDispatcher("/fontend/public/homePage.jsp")
+            request.getRequestDispatcher("/frontend/public/homePage.jsp")
                     .forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
 
             request.setAttribute("errorMessage", "Lỗi khi tải trang chủ: " + e.getMessage());
-            request.getRequestDispatcher("/fontend/public/error.jsp")
+            request.getRequestDispatcher("/Error/error404.jsp")
                     .forward(request, response);
         }
     }

@@ -49,13 +49,13 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
 
         if (error != null) {
             request.setAttribute("error", "Bạn đã từ chối đăng nhập bằng Google.");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
 
         if (code == null || code.trim().isEmpty()) {
             request.setAttribute("error", "Đăng nhập Google thất bại. Vui lòng thử lại.");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
 
@@ -107,7 +107,7 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
                 response.setHeader("Pragma", "no-cache");
                 response.setDateHeader("Expires", 0);
 
-                response.sendRedirect(request.getContextPath() + "/fontend/admin/dashboard.jsp");
+                response.sendRedirect(request.getContextPath() + "/frontend/admin/dashboard.jsp");
                 return;
             }
 
@@ -141,7 +141,7 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Đã xảy ra lỗi khi đăng nhập bằng Google. Vui lòng thử lại.");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
         }
     }
 

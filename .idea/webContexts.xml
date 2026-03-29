@@ -3,8 +3,8 @@
   <component name="WebContextManager">
     <option name="state">
       <map>
-        <entry key="file://$PROJECT_DIR$/src/main/webapp/fontend/nguoiB/orders.jsp" value="file://$PROJECT_DIR$/src/main/webapp/fontend/nguoiB" />
-        <entry key="file://$PROJECT_DIR$/src/main/webapp/fontend/public/header.jsp" value="file://$PROJECT_DIR$/src/main/webapp/fontend/public" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/fontend/admin/promotion.jsp" value="file://$PROJECT_DIR$/src/main/webapp/fontend/admin" />
+<!--        <entry key="file://$PROJECT_DIR$/src/main/webapp/fontend/nguoiB/orders.jsp" value="file://$PROJECT_DIR$/src/main/webapp/fontend/nguoiB" />-->
       </map>
     </option>
   </component>

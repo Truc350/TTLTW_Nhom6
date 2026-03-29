@@ -105,7 +105,7 @@ public class CategoriesServlet extends HttpServlet {
         request.setAttribute("totalComics", totalComics);
         request.setAttribute("pageSize", PAGE_SIZE);
 
-        request.getRequestDispatcher("/fontend/public/CatagoryPage.jsp")
+        request.getRequestDispatcher("/frontend/public/CatagoryPage.jsp")
                 .forward(request, response);
     }
 

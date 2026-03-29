@@ -21,6 +21,6 @@ public class ForgotPasswordServlet extends HttpServlet {
         request.getSession().removeAttribute("otpEmail");
 
         // Forward đến trang ForgotPass.jsp
-        request.getRequestDispatcher("/fontend/public/ForgotPass.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/ForgotPass.jsp").forward(request, response);
     }
 }

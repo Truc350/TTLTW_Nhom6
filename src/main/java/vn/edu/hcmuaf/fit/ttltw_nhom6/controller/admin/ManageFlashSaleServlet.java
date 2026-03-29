@@ -33,7 +33,7 @@ public class ManageFlashSaleServlet extends HttpServlet {
         request.setAttribute("flashSales", flashSales);
         request.setAttribute("timeFormatter", TIME_FORMATTER);
 
-        request.getRequestDispatcher("/fontend/admin/flashSaleMan.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/admin/flashSaleMan.jsp").forward(request, response);
     }
 
     @Override

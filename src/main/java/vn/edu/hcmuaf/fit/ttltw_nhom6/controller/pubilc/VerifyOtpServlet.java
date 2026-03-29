@@ -24,14 +24,14 @@ public class VerifyOtpServlet extends HttpServlet {
             request.getSession().removeAttribute("otpError");
 
             // Chuyển sang trang tạo mật khẩu
-            response.sendRedirect(request.getContextPath() + "/fontend/public/reset-password.jsp");
+            response.sendRedirect(request.getContextPath() + "/frontend/public/reset-password.jsp");
         } else {
             // OTP sai -> giữ otpSent và báo lỗi
             request.getSession().setAttribute("otpSent", true);
             request.getSession().setAttribute("otpError", "Mã xác thực không đúng!");
 
             // dùng forward để giữ otpSent
-            request.getRequestDispatcher("/fontend/public/ForgotPass.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/ForgotPass.jsp").forward(request, response);
         }
     }
 }

@@ -32,7 +32,7 @@ public class PointHistoryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user =(User) request.getSession().getAttribute("currentUser");
         if (user == null) {
-            response.sendRedirect("/fontend/public/login.jsp");
+            response.sendRedirect("/frontend/public/login.jsp");
             return;
         }
         System.out.println(user.getId());
@@ -42,7 +42,7 @@ public class PointHistoryServlet extends HttpServlet {
         List<PointTransaction> pointHistory  = pointTransactionDao.getTransactionsByUserId(user.getId());
         request.setAttribute("pointHistory", pointHistory);
 
-        request.getRequestDispatcher("/fontend/nguoiB/points.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/points.jsp").forward(request, response);
 
     }
 

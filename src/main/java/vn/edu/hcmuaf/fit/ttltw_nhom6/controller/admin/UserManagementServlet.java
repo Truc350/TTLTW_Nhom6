@@ -45,7 +45,7 @@ public class UserManagementServlet extends HttpServlet {
             }
 
             request.setAttribute("users", users);
-            request.getRequestDispatcher("/fontend/admin/userManagement.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/userManagement.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

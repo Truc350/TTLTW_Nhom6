@@ -53,7 +53,7 @@ public class VoucherServlet extends HttpServlet {
             request.setAttribute("message","Mã này đã tồn tại!");
             List<Voucher> allVouchers = voucherDao.getAllVouchers();
             request.setAttribute("allVouchers", allVouchers);
-            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/promotion.jsp").forward(request, response);
            return;
         }
 
@@ -72,7 +72,7 @@ public class VoucherServlet extends HttpServlet {
 
             request.setAttribute("message","Tạo thành công!");
             request.setAttribute("allVouchers", voucherDao.getAllVouchers());
-            request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/promotion.jsp").forward(request, response);
         }
 
     }

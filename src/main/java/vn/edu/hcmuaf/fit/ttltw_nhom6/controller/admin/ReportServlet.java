@@ -37,7 +37,7 @@ public class ReportServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if ("/admin/ReportManagement".equals(path)) {
-            request.getRequestDispatcher("/fontend/admin/report.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/report.jsp").forward(request, response);
             return;
         }
 

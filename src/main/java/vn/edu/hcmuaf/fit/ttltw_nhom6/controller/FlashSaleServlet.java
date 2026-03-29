@@ -47,12 +47,12 @@ public class FlashSaleServlet extends HttpServlet {
             List<FlashSale> upcomingFlashSales = flashSaleDAO.getUpcomingAndActiveFlashSales();
             req.setAttribute("upcomingFlashSales", upcomingFlashSales);
 
-            req.getRequestDispatcher("/fontend/public/FlashSale.jsp").forward(req, resp);
+            req.getRequestDispatcher("/frontend/public/FlashSale.jsp").forward(req, resp);
 
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("errorMessage", "Lỗi khi tải Flash Sale: " + e.getMessage());
-            req.getRequestDispatcher("/fontend/public/error.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Error/error404.jsp").forward(req, resp);
         }
     }
 

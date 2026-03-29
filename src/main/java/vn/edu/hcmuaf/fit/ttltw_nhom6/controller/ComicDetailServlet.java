@@ -119,7 +119,7 @@ public class ComicDetailServlet extends HttpServlet {
             request.setAttribute("totalSell", totalSell);
 
 
-            request.getRequestDispatcher("/fontend/public/detail.jsp")
+            request.getRequestDispatcher("/frontend/public/detail.jsp")
                     .forward(request, response);
 
         } catch (NumberFormatException e) {

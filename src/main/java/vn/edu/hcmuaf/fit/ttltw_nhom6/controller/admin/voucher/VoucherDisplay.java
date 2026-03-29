@@ -25,7 +25,7 @@ public class VoucherDisplay extends HttpServlet {
 
         List<Voucher> allVouchers = voucherDao.getAllVouchers();
         request.setAttribute("allVouchers", allVouchers);
-        request.getRequestDispatcher("/fontend/admin/promotion.jsp")
+        request.getRequestDispatcher("/frontend/admin/promotion.jsp")
                 .forward(request, response);
     }
 

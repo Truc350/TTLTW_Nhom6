@@ -2,8 +2,13 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VoucherDao {
@@ -58,5 +63,46 @@ public class VoucherDao {
                         .one() > 0
         );
 
+    }
+
+    public boolean deleteByCode(String code) {
+        String sql = "DELETE FROM vouchers WHERE code = :code";
+        return jdbi.withHandle(handle ->
+                handle.createUpdate(sql)
+                        .bind("code", code)
+                        .execute() > 0
+        );
+    }
+
+    public List<String> getCategories(){
+        String sql = "Select name_categories from categories";
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                   .mapTo(String.class)
+                    .list()
+                );
+    }
+    public boolean updateVoucher(String code, BigDecimal minOrderAmount, int quantity,
+                              LocalDateTime startDate,  LocalDateTime endDate, boolean isSingleUse) {
+
+        return jdbi.withHandle(handle ->
+               handle.createUpdate("""
+            UPDATE vouchers
+            SET 
+                min_order_amount = :minOrderAmount,
+                quantity = :quantity,
+                start_date = :startDate,
+                end_date = :endDate,
+                is_single_use = :isSingleUse
+            WHERE code = :code
+        """)
+                        .bind("minOrderAmount", minOrderAmount)
+                        .bind("quantity", quantity)
+                        .bind("startDate", startDate)
+                        .bind("endDate", endDate)
+                        .bind("isSingleUse", isSingleUse)
+                        .bind("code", code)
+                        .execute() >0
+        );
     }
 }

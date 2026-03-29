@@ -34,3 +34,11 @@ Giữ dữ liệu request	        Có	            Không
        3.  AJAX gửi request lên server (Servlet/JSP hoặc API).
        4.  Server trả về JSON chứa danh sách truyện phù hợp.
        5.  JS đọc JSON và render kết quả vào <div id="searchResults">.
+
+Method	            Dùng khi
+.mapToBean(Class)	map vào object (Category)
+.mapTo(Class)	    map vào kiểu đơn (String, int...)
+
+tinyint này voucher.singleUse thì nó lấy isSingleUse
+            voucher.isSingleUse thì nó lấy getIsSingleUse
+theo javabean

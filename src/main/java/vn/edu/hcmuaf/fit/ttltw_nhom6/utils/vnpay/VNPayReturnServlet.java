@@ -226,7 +226,7 @@ public class VNPayReturnServlet extends HttpServlet {
             session.setAttribute("orderSuccess",
                     "Đặt hàng thành công! Mã giao dịch VNPay: " + transactionNo);
 
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/order-success");
         } catch (RuntimeException e) {
             e.printStackTrace();
             session.setAttribute("orderError", e.getMessage());

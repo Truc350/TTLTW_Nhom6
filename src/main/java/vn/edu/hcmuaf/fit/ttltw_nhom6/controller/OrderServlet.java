@@ -99,12 +99,15 @@ public class OrderServlet extends HttpServlet {
                     shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
                 }
 
-                boolean usePoints  = "true".equals(request.getParameter("usePoints"));
+                String upStr = request.getParameter("usePoints");
+                boolean usePoints = "on".equals(upStr) || "true".equals(upStr);
                 double discount    = (usePoints && user.getPoints() > 0) ? user.getPoints() : 0;
                 long totalAmount   = (long) Math.max(subtotal + shippingFee - discount, 0);
 
-                String returnUrl = request.getScheme() + "://" + request.getServerName()
-                        + ":" + request.getServerPort()
+//                String returnUrl = request.getScheme() + "://" + request.getServerName()
+//                        + ":" + request.getServerPort()
+//                        + request.getContextPath() + "/vnpay-return";
+                String returnUrl = "https://nonpunctual-lissa-tychistic.ngrok-free.dev"
                         + request.getContextPath() + "/vnpay-return";
 
                 String payUrl = VNPayUtils.createPaymentUrl(
@@ -136,9 +139,14 @@ public class OrderServlet extends HttpServlet {
                 double discount   = (usePoints && user.getPoints() > 0) ? user.getPoints() : 0;
                 long totalAmount  = (long) Math.max(subtotal + shippingFee - discount, 0);
 
-                String payUrl = MoMoUtils.createPaymentUrl(0, totalAmount,
-                        "Thanh toan don hang Comic Store");
-                response.sendRedirect(request.getContextPath() + payUrl);
+                try {
+                    String payUrl = MoMoUtils.createPaymentUrl(0, totalAmount,
+                            "Thanh toan don hang Comic Store");
+                    response.sendRedirect(payUrl);
+                } catch (Exception e) {
+                    session.setAttribute("orderError", "Không thể kết nối MoMo: " + e.getMessage());
+                    response.sendRedirect(request.getContextPath() + "/checkout");
+                }
                 return;
             }
 
@@ -156,7 +164,7 @@ public class OrderServlet extends HttpServlet {
                 return;
             }
 
-            boolean usePoints = "on".equals(usePointsStr);
+            boolean usePoints = "on".equals(usePointsStr) || "true".equals(usePointsStr);
             if ("vnpay".equals(paymentMethod)) {
                 session.setAttribute("pending_receiverName", recipientName);
                 session.setAttribute("pending_receiverPhone", shippingPhone);
@@ -187,11 +195,14 @@ public class OrderServlet extends HttpServlet {
                 if (ipAddress == null || ipAddress.isEmpty()) {
                     ipAddress = request.getRemoteAddr();
                 }
-                String returnURL = request.getScheme() + "://"
-                        + request.getServerName() + ":"
-                        + request.getServerPort()
-                        + request.getContextPath()
-                        + "/vnpay-return";
+//                String returnURL = request.getScheme() + "://"
+//                        + request.getServerName() + ":"
+//                        + request.getServerPort()
+//                        + request.getContextPath()
+//                        + "/vnpay-return";
+
+                String returnURL = "https://nonpunctual-lissa-tychistic.ngrok-free.dev"
+                        + request.getContextPath() + "/vnpay-return";
                 String orderInfo = "Thanh toan don hang - " + recipientName.trim();
                 String paymentUrl = VNPayUtils.createPaymentUrl(
                         user.getId(), totalVnpay, orderInfo, returnURL, ipAddress
@@ -226,7 +237,15 @@ public class OrderServlet extends HttpServlet {
 
             Object subtotalObj = session.getAttribute("checkoutSubtotal");
             double subtotal = subtotalObj != null ? ((Double) subtotalObj) : 0.0;
-            double shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            double shippingFee;
+            try {
+                String shippingFeeParam = request.getParameter("shippingFee");
+                shippingFee = (shippingFeeParam != null && !shippingFeeParam.isEmpty())
+                        ? Double.parseDouble(shippingFeeParam)
+                        : ("express".equals(shippingMethod) ? 50000 : 25000);
+            } catch (NumberFormatException e) {
+                shippingFee = "express".equals(shippingMethod) ? 50000 : 25000;
+            }
 
             int pointsToUse = 0;
             double pointsDiscount = 0;

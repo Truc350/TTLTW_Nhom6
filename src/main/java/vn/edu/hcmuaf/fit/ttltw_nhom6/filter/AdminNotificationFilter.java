@@ -10,7 +10,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.IOException;
 import java.util.List;
-@WebFilter("/fontend/admin/*")
+@WebFilter("/frontend/admin/*")
 public class AdminNotificationFilter implements Filter {
     private NotificationDAO notificationDAO;
 

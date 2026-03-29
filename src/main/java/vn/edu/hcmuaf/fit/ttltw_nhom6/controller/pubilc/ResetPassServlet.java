@@ -31,21 +31,21 @@ public class ResetPassServlet extends HttpServlet {
 
         if (sessionCode == null || sessionEmail == null) {
             request.setAttribute("error", "Bạn chưa có mã xác thực!");
-            request.getRequestDispatcher("/fontend/public/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/reset-password.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra mật khẩu khớp
         if (!oldPassword.equals(newPassword)) {
             request.setAttribute("error", "Mật khẩu xác nhận không khớp!");
-            request.getRequestDispatcher("/fontend/public/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/reset-password.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra format mật khẩu
         if (!PasswordUtils.isValidPasswordFormat(newPassword)) {
             request.setAttribute("error", "Mật khẩu phải ít nhất 8 ký tự, chữ hoa, thường, số và ký tự đặc biệt!");
-            request.getRequestDispatcher("/fontend/public/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/reset-password.jsp").forward(request, response);
             return;
         }
 
@@ -61,13 +61,13 @@ public class ResetPassServlet extends HttpServlet {
 
         // CHỈ SET success = true KHI ĐÃ UPDATE THÀNH CÔNG
         request.setAttribute("success", true);
-        request.getRequestDispatcher("/fontend/public/reset-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/reset-password.jsp").forward(request, response);
     }
 
 //    @Override
 //    protected void doGet(HttpServletRequest request, HttpServletResponse response)
 //            throws ServletException, IOException {
-//        request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+//        request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
 //    }
 
 }

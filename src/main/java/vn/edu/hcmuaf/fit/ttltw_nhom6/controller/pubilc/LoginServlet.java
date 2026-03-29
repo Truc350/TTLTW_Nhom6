@@ -35,7 +35,7 @@ public class LoginServlet extends HttpServlet {
         // Kiểm tra format mật khẩu trước
         if (!PasswordUtils.isValidPasswordFormat(password)) {
             request.setAttribute("error", "Mật khẩu ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
 
@@ -43,7 +43,7 @@ public class LoginServlet extends HttpServlet {
         boolean isActive = userDao.isUserActive(userOpt);
         if (!isActive) {
             request.setAttribute("error", "Tài khoản của bạn đã bị khóa!");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
         if (userOpt.isPresent()) {
@@ -102,11 +102,11 @@ public class LoginServlet extends HttpServlet {
                 OrderViolationService.getInstance().checkLoginFailureViolation(usernameOrEmail);
 
                 request.setAttribute("error", "Hãy nhập đúng tài khoản và mật khẩu!");
-                request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             }
         } else {
             request.setAttribute("error", "Hãy nhập đúng tài khoản và mật khẩu!");
-            request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
         }
     }
 
@@ -118,7 +118,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("/fontend/public/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
     }
 
 

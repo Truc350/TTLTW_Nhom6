@@ -35,22 +35,22 @@ public class RegisterServlet extends HttpServlet {
         if (ValidationUtils.isBlank(username)
                 || ValidationUtils.isBlank(password) || ValidationUtils.isBlank(confirmPassword)) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
         if (!ValidationUtils.isAtLeastOne(email, phone)) {
             request.setAttribute("error", "Vui lòng nhập ít nhất email hoặc số điện thoại!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
         if (!ValidationUtils.isBlank(email) && !ValidationUtils.isValidEmail(email)) {
             request.setAttribute("error", "Email không đúng định dạng!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
         if (!ValidationUtils.isBlank(phone) && !ValidationUtils.isValidPhone(phone)) {
             request.setAttribute("error", "Số điện thoại không đúng định dạng (VD: 0912345678)");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
 
@@ -58,32 +58,32 @@ public class RegisterServlet extends HttpServlet {
         // Kiểm tra mật khẩu khớp
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "Mật khẩu không khớp!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra format mật khẩu
         if (!PasswordUtils.isValidPasswordFormat(password)) {
             request.setAttribute("error", "Mật khẩu phải ít nhất 8 ký tự, chữ hoa, thường, số và ký tự đặc biệt!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra username/email đã tồn tại
         if (userDao.findByUsername(username).isPresent()) {
             request.setAttribute("error", "Tên đăng nhập đã tồn tại!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
         if (!ValidationUtils.isBlank(phone) && userDao.findByPhone(phone).isPresent()) {
             request.setAttribute("error", "Số điện thoại đã được sử dụng!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
 
         if (!ValidationUtils.isBlank(email) && userDao.findByEmail(email).isPresent()) {
             request.setAttribute("error", "Email đã được sử dụng!");
-            request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
             return;
         }
 
@@ -100,7 +100,7 @@ public class RegisterServlet extends HttpServlet {
         // Sau khi insert user thành công
         userDao.insert(user);
         request.setAttribute("success", true);
-        request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
 
     }
 
@@ -108,6 +108,6 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/fontend/public/Register.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
     }
 }

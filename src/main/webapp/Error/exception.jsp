@@ -49,7 +49,7 @@
 <body>
 <div class="error-container">
     <h2>Exception!</h2>
-    <a href="${pageContext.request.contextPath}/fontend/public/homePage.jsp" class="btn-home">Về trang chủ</a>
+    <a href="${pageContext.request.contextPath}/frontend/public/homePage.jsp" class="btn-home">Về trang chủ</a>
 </div>
 </body>
 </html>

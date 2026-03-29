@@ -267,13 +267,13 @@ public class AdminOrderManagementServlet extends HttpServlet {
                 req.setAttribute("message", data.get("message"));
             }
 
-            req.getRequestDispatcher("/fontend/admin/order.jsp")
+            req.getRequestDispatcher("/frontend/admin/order.jsp")
                     .forward(req, resp);
 
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("message", "Lỗi khi tải danh sách đơn hàng: " + e.getMessage());
-            req.getRequestDispatcher("/fontend/admin/order.jsp")
+            req.getRequestDispatcher("/frontend/admin/order.jsp")
                     .forward(req, resp);
         }
     }

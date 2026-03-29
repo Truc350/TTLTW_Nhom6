@@ -143,7 +143,7 @@ public class CheckoutServlet extends HttpServlet {
             session.removeAttribute("orderError");
         }
 
-        request.getRequestDispatcher("/fontend/nguoiB/checkout.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/checkout.jsp").forward(request, response);
     }
 
     @Override

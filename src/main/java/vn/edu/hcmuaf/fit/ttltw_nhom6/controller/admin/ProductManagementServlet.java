@@ -157,7 +157,7 @@ public class ProductManagementServlet extends HttpServlet {
             request.setAttribute("currentPage", page);
 
 
-            request.getRequestDispatcher("/fontend/admin/productManagement.jsp").forward(request, response);
+            request.getRequestDispatcher("/frontend/admin/productManagement.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -173,7 +173,7 @@ public class ProductManagementServlet extends HttpServlet {
                 response.getWriter().write(gson.toJson(error));
             } else {
                 request.setAttribute("errorMessage", "Có lỗi xảy ra khi tải trang: " + e.getMessage());
-                request.getRequestDispatcher("/fontend/admin/productManagement.jsp").forward(request, response);
+                request.getRequestDispatcher("/frontend/admin/productManagement.jsp").forward(request, response);
             }
         }
     }

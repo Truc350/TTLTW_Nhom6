@@ -38,7 +38,7 @@ public class ChangePasswordServlet extends HttpServlet {
             session.removeAttribute("success");
         }
 
-        request.getRequestDispatcher("/fontend/nguoiB/change-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/change-password.jsp").forward(request, response);
     }
 
 
@@ -125,6 +125,6 @@ public class ChangePasswordServlet extends HttpServlet {
     private void setErrorAndForward(HttpServletRequest request, HttpServletResponse response, String message)
             throws ServletException, IOException {
         request.setAttribute("error", message);
-        request.getRequestDispatcher("/fontend/nguoiB/change-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/change-password.jsp").forward(request, response);
     }
 }

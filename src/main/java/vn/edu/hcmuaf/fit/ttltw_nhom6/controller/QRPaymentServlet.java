@@ -14,7 +14,7 @@ public class QRPaymentServlet extends HttpServlet {
         req.setAttribute("orderId", req.getParameter("orderId"));
         req.setAttribute("qrUrl",   req.getParameter("qr"));
         req.setAttribute("info",    req.getParameter("info"));
-        req.getRequestDispatcher("/fontend/nguoiB/qr-payment.jsp")
+        req.getRequestDispatcher("/frontend/nguoiB/qr-payment.jsp")
                 .forward(req, resp);
     }
 

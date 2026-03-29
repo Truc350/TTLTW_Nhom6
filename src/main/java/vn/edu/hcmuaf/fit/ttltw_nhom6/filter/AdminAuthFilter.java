@@ -9,7 +9,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 
 import java.io.IOException;
 
-@WebFilter({"/fontend/admin/*", "/admin/*"})
+@WebFilter({"/frontend/admin/*", "/admin/*"})
 public class AdminAuthFilter implements Filter {
 
     @Override

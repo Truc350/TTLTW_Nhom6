@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.ValidationResult;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.utils.ValidationUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -44,11 +46,23 @@ public class UpdateUserServlet extends HttpServlet {
             int day = Integer.parseInt(request.getParameter("day"));
             int month = Integer.parseInt(request.getParameter("month"));
             int year = Integer.parseInt(request.getParameter("year"));
+            
             LocalDate birthdate = LocalDate.of(year, month, day);
 
             String province = request.getParameter("province");
             String district = request.getParameter("district");
             String houseNumber = request.getParameter("house-number");
+            ValidationResult result = ValidationUtils.validateUpdateProfile(
+                    ho, ten, phone, email, gender,
+                    day, month, year,
+                    houseNumber, district, province
+            );
+            if (result.hasErrors()){
+                request.setAttribute("errors", result.getErrors());
+                request.setAttribute("firstError", result.getFirstError());
+                request.getRequestDispatcher("/frontend/nguoiB/profile-info.jsp").forward(request, response);
+                return;
+            }
 
             String fullName = ho + " " + ten;
 
@@ -87,7 +101,7 @@ public class UpdateUserServlet extends HttpServlet {
         }
 
         // Forward về trang profile
-        request.getRequestDispatcher("/fontend/nguoiB/profile-info.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/profile-info.jsp").forward(request, response);
     }
 
     @Override
@@ -102,6 +116,6 @@ public class UpdateUserServlet extends HttpServlet {
         }
 
         // Forward sang trang profile
-        request.getRequestDispatcher("/fontend/nguoiB/profile-info.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/profile-info.jsp").forward(request, response);
     }
 }

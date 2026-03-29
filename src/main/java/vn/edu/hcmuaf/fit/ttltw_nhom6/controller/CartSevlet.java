@@ -188,7 +188,7 @@ public class CartSevlet extends HttpServlet {
         User currentUser = (User) session.getAttribute("currentUser");
         request.setAttribute("isLoggedIn", currentUser != null);
 
-        request.getRequestDispatcher("/fontend/nguoiB/cart.jsp").forward(request, response);
+        request.getRequestDispatcher("/frontend/nguoiB/cart.jsp").forward(request, response);
     }
     private void addToCart(HttpServletRequest request, HttpServletResponse response, Cart cart, HttpSession session) throws ServletException, IOException {
         try {

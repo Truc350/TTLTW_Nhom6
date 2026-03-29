@@ -59,4 +59,17 @@ public class VoucherDao {
         );
 
     }
+
+    public List<Voucher> getVouchersExpiringTomorrow() {
+        String sql = """
+        SELECT * FROM vouchers
+        WHERE DATE(end_date) = DATE(DATE_ADD(NOW(), INTERVAL 1 DAY))
+          AND quantity > used_count
+        """;
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(Voucher.class)
+                        .list()
+        );
+    }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.NotificationDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.VoucherDao;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Voucher;
 
@@ -60,6 +61,15 @@ public class VoucherServlet extends HttpServlet {
                                         start_date, end_date, min_order_amount,is_single_use);
 
         if(voucherDao.addVoucher(voucher)){
+            NotificationDAO notificationDAO = NotificationDAO.getInstance();
+            String message = "Mã giảm giá mới: " + voucher.getCode() + "\n"
+                    + "Giảm " + voucher.getDiscountValue()
+                    + ("PERCENT".equals(voucher.getDiscountType()) ? "%" : "đ")
+                    + " | HSD: " + voucher.getEndDate() + "\n"
+                    + "Nhập mã khi thanh toán để được giảm giá!";
+
+            notificationDAO.insertForAllUsers(message, "VOUCHER_NEW");
+
             request.setAttribute("message","Tạo thành công!");
             request.setAttribute("allVouchers", voucherDao.getAllVouchers());
             request.getRequestDispatcher("/fontend/admin/promotion.jsp").forward(request, response);

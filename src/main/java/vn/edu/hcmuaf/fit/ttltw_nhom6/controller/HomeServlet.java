@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-@WebServlet({ "/home"})
+@WebServlet({"/", "/home"})
 public class HomeServlet extends HttpServlet {
     private ComicDAO comicDAO;
     private FlashSaleDAO flashSaleDAO;
@@ -47,7 +47,6 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         try {
             flashSaleDAO.updateStatuses();
 

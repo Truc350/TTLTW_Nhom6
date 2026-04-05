@@ -74,7 +74,7 @@
                                         <button class="btn-view" data-id="${fs.id}">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
-                                        <button class="btn-edit openEditFlashSale" data-id="${fs.id}">
+                                        <button class="btn-edit openEditFlashSale" data-id="${fs.id}" data-status="${fs.status}">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <button class="btn-delete" data-id="${fs.id}">
@@ -137,6 +137,14 @@
     <div class="modal-flashsale">
         <h3>Chỉnh sửa Flash Sale</h3>
         <form id="editFlashSaleForm">
+            <div id="endedNotice" style="display:none; background:#fff3cd; border:1px solid #ffc107;
+     color:#856404; padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:14px;">
+                ⚠️ Flash Sale đã kết thúc, không thể chỉnh sửa. Hãy tạo Flash Sale mới.
+            </div>
+            <div id="activeNotice" style="display:none; background:#d1ecf1; border:1px solid #bee5eb;
+     color:#0c5460; padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:14px;">
+                ℹ️ Flash Sale đang diễn ra. Chỉ có thể thêm/bớt truyện, không thể đổi thời gian.
+            </div>
             <div class="form-row">
                 <div>
                     <label>Tên Flash Sale:</label>

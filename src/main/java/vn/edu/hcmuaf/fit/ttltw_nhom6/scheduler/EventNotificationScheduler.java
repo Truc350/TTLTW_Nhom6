@@ -50,7 +50,6 @@ public class EventNotificationScheduler implements ServletContextListener {
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
 
         List<FlashSale> newFlashSales = flashSaleDAO.getNewlyCreatedFlashSales();
-        System.out.println("[Scheduler] Found " + newFlashSales.size() + " new flash sales to notify");
 
         for (FlashSale fs : newFlashSales) {
             try {
@@ -66,7 +65,6 @@ public class EventNotificationScheduler implements ServletContextListener {
 
                 notificationDAO.insertForAllUsers(message, "FLASH_SALE_UPCOMING");
                 flashSaleDAO.markNotifiedCreated(fs.getId());
-                System.out.println("[Scheduler] Notified flash sale ID: " + fs.getId());
             } catch (Exception e) {
                 System.err.println("[Scheduler] Failed to notify flash sale ID: " + fs.getId());
                 e.printStackTrace();
@@ -98,8 +96,12 @@ public class EventNotificationScheduler implements ServletContextListener {
         List<Voucher> expiringVouchers = voucherDao.getVouchersExpiringTomorrow();
 
         for (Voucher v : expiringVouchers) {
-            String message = "Mã giảm giá \"" + v.getCode() + "\" sắp hết hạn vào ngày mai!\n"
-                    + "Dùng ngay trước khi hết hạn!";
+            String endDateFormatted = v.getEndDate() != null
+                    ? v.getEndDate().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"))
+                    : "N/A";
+
+            String message = "Mã giảm giá \"" + v.getCode() + "\" sắp hết hạn!\n"
+                    + "HSD: " + endDateFormatted;
 
             notificationDAO.insertForAllUsers(message, "VOUCHER_EXPIRING");
         }

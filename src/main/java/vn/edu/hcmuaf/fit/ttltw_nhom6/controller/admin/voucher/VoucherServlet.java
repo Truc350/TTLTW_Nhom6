@@ -62,11 +62,21 @@ public class VoucherServlet extends HttpServlet {
 
         if(voucherDao.addVoucher(voucher)){
             NotificationDAO notificationDAO = NotificationDAO.getInstance();
+
+            String startDateFormatted = voucher.getStartDate() != null
+                    ? voucher.getStartDate().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"))
+                    : "N/A";
+
+            String endDateFormatted = voucher.getEndDate() != null
+                    ? voucher.getEndDate().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"))
+                    : "N/A";
+
+            boolean isPercent = voucher.getDiscountType() != null
+                    && voucher.getDiscountType().equalsIgnoreCase("PERCENT");
+
             String message = "Mã giảm giá mới: " + voucher.getCode() + "\n"
-                    + "Giảm " + voucher.getDiscountValue()
-                    + ("PERCENT".equals(voucher.getDiscountType()) ? "%" : "đ")
-                    + " | HSD: " + voucher.getEndDate() + "\n"
-                    + "Nhập mã khi thanh toán để được giảm giá!";
+                    + "Giảm " + voucher.getDiscountValue() + (isPercent ? "%" : "đ") + "\n"
+                    + "Hiệu lực: " + startDateFormatted + " — " + endDateFormatted;
 
             notificationDAO.insertForAllUsers(message, "VOUCHER_NEW");
 

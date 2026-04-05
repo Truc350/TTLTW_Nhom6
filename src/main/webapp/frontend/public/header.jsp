@@ -1,9 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.Category" %>
-<%@ page import="java.util.List" %>
-<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CategoriesDao" %>
-<%@ page import="vn.edu.hcmuaf.fit.ttltw_nhom6.model.User" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <header class="navbar">
@@ -18,29 +14,20 @@
         <div class="dropdown">
             <a href="#">Thể loại &#9662;</a>
             <div class="dropdown-content">
-                <%
-                    List<Category> listCategories = (List<Category>) request.getAttribute("listCategories");
-                    if (listCategories == null || listCategories.isEmpty()) {
-                        CategoriesDao categoriesDao = new CategoriesDao();
-                        listCategories = categoriesDao.listCategories();
-                    }
-
-                    if (listCategories != null && !listCategories.isEmpty()) {
-                        for (Category c : listCategories) {
-                            if (c.getIs_hidden() == 0) {
-                %>
-                <a href="${pageContext.request.contextPath}/userCategory?id=<%= c.getId() %>">
-                    <%= c.getNameCategories() %>
-                </a>
-                <%
-                        }
-                    }
-                } else {
-                %>
-                <a href="#">Không có thể loại</a>
-                <%
-                    }
-                %>
+                <c:choose>
+                    <c:when test="${not empty listCategories}">
+                        <c:forEach var="cat" items="${listCategories}">
+                            <c:if test="${cat.is_hidden == 0}">
+                                <a href="${pageContext.request.contextPath}/userCategory?id=${cat.id}">
+                                        ${cat.nameCategories}
+                                </a>
+                            </c:if>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="#">Không có thể loại</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
         <a href="${pageContext.request.contextPath}/frontend/public/AbouUS.jsp">Liên hệ</a>
@@ -60,6 +47,10 @@
                     <i class="fas fa-magnifying-glass"></i>
                 </button>
             </form>
+
+            <div id="suggestDropdown" class="suggest-dropdown">
+                <ul id="suggestList" class="suggest-list"></ul>
+            </div>
 
             <div id="searchDropdown" class="search-history-dropdown">
                 <div class="history-header">
@@ -112,125 +103,17 @@
             <i class="fa-solid fa-user" id="user"></i>
             <div class="dropdown-user">
                 <a href="${pageContext.request.contextPath}/updateUser">Người dùng</a>
-
-                <%
-                    User curnentUser = (User) session.getAttribute("currentUser");
-                    if (curnentUser != null) {
-                %>
-                <a href="<%= request.getContextPath() %>/logout">Đăng xuất</a>
-                <%
-                } else {
-
-                %>
-                <a href="<%= request.getContextPath() %>/login">Đăng nhập</a>
-                <%
-                    }
-                %>
+                <c:choose>
+                    <c:when test="${not empty sessionScope.currentUser}">
+                        <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
-
-    <style>
-        .social-float-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .social-toggle-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: #fff;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: #fff;
-            transition: transform 0.3s ease, background 0.3s ease;
-        }
-
-        .social-toggle-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .social-toggle-btn.open {
-            /*background: #fff;*/
-            transform: rotate(20deg);
-        }
-
-        .social-items {
-            background: #fff;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            gap: 10px;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            transition: max-height 0.4s ease, opacity 0.3s ease;
-        }
-
-        .social-items.open {
-            max-height: 200px;
-            opacity: 1;
-            background: #fff;
-        }
-
-        .social-float-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: block;
-        }
-
-        .social-float-btn:hover {
-            transform: scale(1.12);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-        }
-
-        .social-float-btn img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .social-float-btn {
-            position: relative;
-        }
-
-        .social-float-btn::before {
-            content: attr(data-tooltip);
-            position: absolute;
-            right: 54px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .social-float-btn:hover::before {
-            opacity: 1;
-        }
-    </style>
 
     <div class="social-float-container">
         <button class="social-toggle-btn" id="socialToggle" title="Liên hệ">
@@ -241,7 +124,8 @@
             <a class="social-float-btn" href="https://zalo.me/0394158994" target="_blank" data-tooltip="Zalo">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo">
             </a>
-            <a class="social-float-btn" href="https://www.facebook.com/share/1MVc1miHnd/" target="_blank" data-tooltip="Facebook">
+            <a class="social-float-btn" href="https://www.facebook.com/share/1MVc1miHnd/" target="_blank"
+               data-tooltip="Facebook">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="Facebook">
             </a>
             <a class="social-float-btn" href="https://www.instagram.com/comic.store/" target="_blank"
@@ -267,9 +151,11 @@
         });
     </script>
 </header>
+
 <script>
+    <%--    LỊCH SỬ TÌM KIẾM--%>
     const searchInput = document.getElementById('searchInput');
-    const dropdown = document.getElementById('searchDropdown');
+    const historyDropdown = document.getElementById('searchDropdown');
     const tagsContainer = document.getElementById('historyTagsContainer');
     const clearAllBtn = document.getElementById('clearAll');
 
@@ -280,6 +166,14 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(searchHistory));
     }
 
+    function addToHistory(term) {
+        if (!term) return;
+        searchHistory = searchHistory.filter(t => t !== term);
+        searchHistory.unshift(term);
+        if (searchHistory.length > 20) searchHistory.pop();
+        saveHistory();
+    }
+
     function removeHistoryItem(term) {
         searchHistory = searchHistory.filter(t => t !== term);
         saveHistory();
@@ -288,12 +182,10 @@
 
     function renderHistory() {
         tagsContainer.innerHTML = '';
-
         if (!searchHistory.length) {
             tagsContainer.innerHTML = '<div style="padding:12px 16px;color:#999;font-style:italic;text-align:center">Không có lịch sử</div>';
             return;
         }
-
         searchHistory.slice(0, 20).forEach(term => {
             const tag = document.createElement('div');
             tag.className = 'history-tag';
@@ -302,7 +194,7 @@
             text.textContent = term;
             text.onclick = () => {
                 searchInput.value = term;
-                hideDropdown();
+                hideAll();
                 searchInput.form.submit();
             };
 
@@ -320,25 +212,159 @@
         });
     }
 
-    function showDropdown() {
+    function showHistory() {
         renderHistory();
-        dropdown.classList.add('show');
+        historyDropdown.classList.add('show');
     }
 
-    function hideDropdown() {
-        dropdown.classList.remove('show');
+    function hideHistory() {
+        historyDropdown.classList.remove('show');
     }
 
-    searchInput.addEventListener('focus', showDropdown);
-    searchInput.addEventListener('input', showDropdown);
+    // GỢI Ý TÌM KIẾM
+    const suggestDropdown = document.getElementById('suggestDropdown');
+    const suggestList = document.getElementById('suggestList');
+    const CONTEXT_PATH = '<%= request.getContextPath() %>';
 
-    document.addEventListener('click', (e) => {
-        if (!dropdown.contains(e.target) && e.target !== searchInput) {
-            hideDropdown();
+    let suggestTimer = null;
+    let lastQuery = '';
+    let activeIndex = -1;
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function openSuggest() {
+        suggestDropdown.classList.add('open');
+        hideHistory();
+    }
+
+    function closeSuggest() {
+        suggestDropdown.classList.remove('open');
+        activeIndex = -1;
+    }
+
+    function hideAll() {
+        closeSuggest();
+        hideHistory();
+    }
+
+    async function fetchSuggestions(keyword) {
+        if (keyword === lastQuery) return;
+        lastQuery = keyword;
+        activeIndex = -1;
+
+        try {
+            const res = await fetch(CONTEXT_PATH + '/search-suggest?q=' + encodeURIComponent(keyword));
+            const data = await res.json();
+
+            if (keyword !== searchInput.value.trim()) return;
+
+            suggestList.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                suggestList.innerHTML = '<li class="suggest-empty">Không tìm thấy kết quả nào</li>';
+                openSuggest();
+                return;
+            }
+
+            data.forEach((comic, idx) => {
+                const li = document.createElement('li');
+                li.className = 'suggest-item';
+                li.dataset.index = idx;
+                li.innerHTML =
+                    '<i class="fa-solid fa-magnifying-glass suggest-item-icon"></i>' +
+                    '<span class="suggest-item-name">' + escapeHtml(comic.name) + '</span>';
+
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    addToHistory(keyword);
+                    window.location.href = CONTEXT_PATH + '/comic-detail?id=' + comic.id;
+                });
+
+                suggestList.appendChild(li);
+            });
+
+            const footer = document.createElement('div');
+            footer.className = 'suggest-footer';
+            footer.innerHTML =
+                '<a href="' + CONTEXT_PATH + '/search?keyword=' + encodeURIComponent(keyword) + '">' +
+                'Xem tất cả kết quả cho "<strong>' + escapeHtml(keyword) + '</strong>"</a>';
+            suggestList.appendChild(footer);
+
+            openSuggest();
+
+        } catch (err) {
+            console.error('Suggest fetch error:', err);
+        }
+    }
+
+    function navigateSuggestions(direction) {
+        const items = suggestList.querySelectorAll('.suggest-item');
+        if (!items.length) return;
+        items.forEach(i => i.classList.remove('active'));
+
+        if (direction === 'down') {
+            activeIndex = (activeIndex + 1) % items.length;
+        } else {
+            activeIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
+        }
+
+        items[activeIndex].classList.add('active');
+    }
+
+    searchInput.addEventListener('focus', () => {
+        const val = searchInput.value.trim();
+        if (val.length >= 1) {
+            fetchSuggestions(val);
+        } else {
+            closeSuggest();
+            showHistory();
         }
     });
 
-    window.addEventListener('scroll', hideDropdown);
+    searchInput.addEventListener('input', () => {
+        const val = searchInput.value.trim();
+        clearTimeout(suggestTimer);
+        lastQuery = '';
+
+        if (val.length === 0) {
+            closeSuggest();
+            showHistory();
+            return;
+        }
+
+        suggestTimer = setTimeout(() => fetchSuggestions(val), 250);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (!suggestDropdown.classList.contains('open')) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            navigateSuggestions('down');
+        }
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            navigateSuggestions('up');
+        }
+        if (e.key === 'Escape') {
+            hideAll();
+            searchInput.blur();
+        }
+        if (e.key === 'Enter' && activeIndex >= 0) {
+            e.preventDefault();
+            const active = suggestList.querySelector('.suggest-item.active');
+            if (active) active.dispatchEvent(new MouseEvent('mousedown'));
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!document.querySelector('.search-box').contains(e.target)) hideAll();
+    });
+
+    window.addEventListener('scroll', hideAll);
 
     searchInput.form.addEventListener('submit', (e) => {
         const term = searchInput.value.trim();
@@ -346,17 +372,9 @@
             e.preventDefault();
             return;
         }
-
-        const searchButton = document.querySelector('.search-button');
-        if (searchButton) {
-            searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        }
-
-        searchHistory = searchHistory.filter(t => t !== term);
-        searchHistory.unshift(term);
-        if (searchHistory.length > 20) searchHistory.pop();
-
-        saveHistory();
+        const btn = document.querySelector('.search-button');
+        if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        addToHistory(term);
     });
 
     clearAllBtn.onclick = () => {
@@ -449,6 +467,7 @@
                 }
             }
         }
+
         document.addEventListener('DOMContentLoaded', () => {
 
             const bell = document.getElementById('bell-icon');

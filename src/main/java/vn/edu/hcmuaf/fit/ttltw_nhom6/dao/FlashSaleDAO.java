@@ -194,4 +194,56 @@ public class FlashSaleDAO extends ADao {
                 handle.createQuery(sql).mapToMap().list()
         );
     }
+
+    public List<FlashSale> getNewlyCreatedFlashSales() {
+        String sql = """
+        SELECT id, name, start_time, end_time, discount_percent,
+               status, created_at, is_deleted,
+               notified_created, notified_started
+        FROM flashsale
+        WHERE notified_created = 0
+          AND is_deleted = 0
+          AND end_time > NOW()
+        """;
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(FlashSale.class)
+                        .list()
+        );
+    }
+
+    public List<FlashSale> getFlashSalesStartingNow() {
+        String sql = """
+        SELECT id, name, start_time, end_time, discount_percent,
+               status, created_at, is_deleted,
+               notified_created, notified_started
+        FROM flashsale
+        WHERE notified_started = 0
+          AND status = 'active'
+          AND start_time <= NOW()
+          AND end_time > NOW()
+          AND is_deleted = 0
+        """;
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(FlashSale.class)
+                        .list()
+        );
+    }
+
+    public void markNotifiedCreated(int flashSaleId) {
+        jdbi.useHandle(handle ->
+                handle.createUpdate("UPDATE flashsale SET notified_created = 1 WHERE id = ?")
+                        .bind(0, flashSaleId)
+                        .execute()
+        );
+    }
+
+    public void markNotifiedStarted(int flashSaleId) {
+        jdbi.useHandle(handle ->
+                handle.createUpdate("UPDATE flashsale SET notified_started = 1 WHERE id = ?")
+                        .bind(0, flashSaleId)
+                        .execute()
+        );
+    }
 }

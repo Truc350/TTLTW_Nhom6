@@ -22,6 +22,12 @@ public class FlashSale {
     @ColumnName("is_deleted")
     private boolean isDeleted;
 
+    @ColumnName("notified_created")
+    private boolean notifiedCreated;
+
+    @ColumnName("notified_started")
+    private boolean notifiedStarted;
+
     public FlashSale() {
     }
 
@@ -154,4 +160,10 @@ public class FlashSale {
         if (endTime == null) return "";
         return endTime.format(FORMATTER);
     }
+
+    public boolean isNotifiedCreated() { return notifiedCreated; }
+    public void setNotifiedCreated(boolean notifiedCreated) { this.notifiedCreated = notifiedCreated; }
+
+    public boolean isNotifiedStarted() { return notifiedStarted; }
+    public void setNotifiedStarted(boolean notifiedStarted) { this.notifiedStarted = notifiedStarted; }
 }

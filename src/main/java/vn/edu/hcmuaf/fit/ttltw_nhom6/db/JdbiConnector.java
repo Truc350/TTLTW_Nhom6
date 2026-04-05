@@ -19,17 +19,17 @@ JdbiConnector {
         }
 
         if (jdbi == null) {
-//            jdbi = Jdbi.create(
-//                    "jdbc:mysql://" + DBProperties.host() + ":" + DBProperties.port() + "/" + DBProperties.database(),
-//                    DBProperties.username(),
-//                    DBProperties.password()
-//            );
             jdbi = Jdbi.create(
-                    "jdbc:mysql://" + DBProperties.host() + ":" + DBProperties.port() + "/" + DBProperties.database()
-                            + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                    "jdbc:mysql://" + DBProperties.host() + ":" + DBProperties.port() + "/" + DBProperties.database(),
                     DBProperties.username(),
                     DBProperties.password()
             );
+//            jdbi = Jdbi.create(
+//                    "jdbc:mysql://" + DBProperties.host() + ":" + DBProperties.port() + "/" + DBProperties.database()
+//                            + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+//                    DBProperties.username(),
+//                    DBProperties.password()
+//            );
 
             jdbi.installPlugin(new SqlObjectPlugin());
         }

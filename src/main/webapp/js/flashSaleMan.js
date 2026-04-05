@@ -282,7 +282,7 @@ function initializeEditFlashSale() {
         }
     });
     document.querySelectorAll('.openEditFlashSale').forEach(btn => {
-        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id, btn.dataset.status));
     });
     updateBtn?.addEventListener('click', updateFlashSale);
 }
@@ -349,7 +349,7 @@ function addComicToEditList(id, name) {
     editProductList.appendChild(label);
 }
 
-function openEditModal(flashSaleId) {
+function openEditModal(flashSaleId, status) {
     currentEditId = flashSaleId?.trim();
 
     if (!currentEditId) {
@@ -369,6 +369,12 @@ function openEditModal(flashSaleId) {
         .then(result => {
             if (result.success && result.data) {
                 fillEditForm(result.data);
+                resetEditModal();
+                if (status === 'ended') {
+                    applyEndedMode();
+                } else if (status === 'active') {
+                    applyActiveMode();
+                }
                 document.getElementById('editFlashSaleModal').classList.add('show');
             } else {
                 showNotifyPopup(result.message || 'Không thể tải thông tin!', 'error');
@@ -715,7 +721,7 @@ function reattachEventListeners() {
 
     document.querySelectorAll('.openEditFlashSale').forEach(btn => {
         btn.addEventListener('click', () => {
-            openEditModal(btn.dataset.id);
+            openEditModal(btn.dataset.id, btn.dataset.status);
         });
     });
 }
@@ -822,4 +828,41 @@ function showNotifyPopup(message, type = 'success', onClose = null) {
         overlay.remove();
         if (onClose) onClose();
     });
+}
+
+function resetEditModal() {
+    document.getElementById('endedNotice').style.display = 'none';
+    document.getElementById('activeNotice').style.display = 'none';
+
+    const form = document.getElementById('editFlashSaleForm');
+    form.querySelectorAll('input').forEach(el => el.disabled = false);
+
+    document.getElementById('updateFlashSaleBtn').style.display = 'inline-block';
+    document.getElementById('editComicSearchInput').style.display = 'block';
+    document.getElementById('applySelectedComicBtn').style.display = 'inline-block';
+}
+
+function applyEndedMode() {
+    document.getElementById('endedNotice').style.display = 'block';
+
+    const form = document.getElementById('editFlashSaleForm');
+    form.querySelectorAll('input').forEach(el => el.disabled = true);
+
+    document.getElementById('updateFlashSaleBtn').style.display = 'none';
+    document.getElementById('editComicSearchInput').style.display = 'none';
+    document.getElementById('applySelectedComicBtn').style.display = 'none';
+
+    document.querySelectorAll('#editProductList .remove-comic-edit-btn').forEach(btn => {
+        btn.style.display = 'none';
+    });
+}
+
+function applyActiveMode() {
+    document.getElementById('activeNotice').style.display = 'block';
+
+    const form = document.getElementById('editFlashSaleForm');
+    form.querySelector('input[name="flashSaleName"]').disabled = true;
+    form.querySelector('input[name="discountPercent"]').disabled = true;
+    form.querySelector('input[name="startTime"]').disabled = true;
+    form.querySelector('input[name="endTime"]').disabled = true;
 }

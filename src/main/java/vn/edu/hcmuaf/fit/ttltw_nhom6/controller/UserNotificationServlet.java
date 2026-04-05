@@ -219,6 +219,14 @@ public class UserNotificationServlet extends HttpServlet {
                 return "Khuyến mãi mới";
             case "SYSTEM":
                 return "Thông báo hệ thống";
+            case "FLASH_SALE_UPCOMING":
+                return "Flash Sale sắp diễn ra!";
+            case "FLASH_SALE_STARTED":
+                return "Flash Sale đã bắt đầu!";
+            case "VOUCHER_NEW":
+                return "Mã giảm giá mới dành cho bạn";
+            case "VOUCHER_EXPIRING":
+                return "Mã giảm giá sắp hết hạn";
             default:
                 return "Thông báo";
         }

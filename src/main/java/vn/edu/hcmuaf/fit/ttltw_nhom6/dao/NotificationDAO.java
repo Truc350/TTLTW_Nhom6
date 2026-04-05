@@ -64,19 +64,30 @@ public class NotificationDAO {
                 FROM notifications
                 WHERE user_id = ?
                 """);
-        if (typeFilter != null) {
-            if ("ORDER".equals(typeFilter)) {
-                sql.append(" AND type LIKE 'ORDER_%'");
-            } else {
-                sql.append(" AND type = ?");
-            }
+        if ("EVENT".equals(typeFilter)) {
+            sql.append("""
+             AND type IN (
+                 'PROMOTION',
+                 'FLASH_SALE_UPCOMING',
+                 'FLASH_SALE_STARTED',
+                 'VOUCHER_NEW',
+                 'VOUCHER_EXPIRING'
+             )
+            """);
+        } else if ("ORDER".equals(typeFilter)) {
+            sql.append(" AND type LIKE 'ORDER_%'");
+        } else if (typeFilter != null) {
+            sql.append(" AND type = ?");
         }
+
         sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
 
         return JdbiConnector.get().withHandle(handle -> {
             var query = handle.createQuery(sql.toString()).bind(0, userId);
             int paramIndex = 1;
-            if (typeFilter != null && !"ORDER".equals(typeFilter)) {
+            if (typeFilter != null
+                    && !"ORDER".equals(typeFilter)
+                    && !"EVENT".equals(typeFilter)) {
                 query.bind(paramIndex++, typeFilter);
             }
             query.bind(paramIndex++, pageSize);
@@ -172,5 +183,32 @@ public class NotificationDAO {
 
             return notification;
         }
+    }
+
+    public void insertForAllUsers(String message, String type) {
+        String getUsersSql = "SELECT id FROM users WHERE is_deleted = 0";
+        List<Integer> userIds = jdbi.withHandle(handle ->
+                handle.createQuery(getUsersSql)
+                        .mapTo(Integer.class)
+                        .list()
+        );
+
+        if (userIds.isEmpty()) return;
+
+        String insertSql = """
+        INSERT INTO notifications (user_id, message, type, is_read, created_at)
+        VALUES (?, ?, ?, 0, NOW())
+        """;
+
+        jdbi.useHandle(handle -> {
+            var batch = handle.prepareBatch(insertSql);
+            for (int userId : userIds) {
+                batch.bind(0, userId)
+                        .bind(1, message)
+                        .bind(2, type)
+                        .add();
+            }
+            batch.execute();
+        });
     }
 }

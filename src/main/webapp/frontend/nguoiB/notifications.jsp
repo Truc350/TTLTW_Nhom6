@@ -103,6 +103,10 @@
                 else if (n.type === 'REFUND_REJECTED') icon = '<i class="fa-solid fa-ban" style="color:#dc3545;"></i>';
                 else if (n.type === 'ORDER_UPDATE')    icon = '<i class="fa-solid fa-box-open" style="color:#17a2b8;"></i>';
                 else if (n.type === 'PROMOTION')       icon = '<i class="fa-solid fa-tag" style="color:#e83e8c;"></i>';
+                else if (n.type === 'FLASH_SALE_UPCOMING') icon = '<i class="fa-solid fa-fire" style="color:#ff6b35;"></i>';
+                else if (n.type === 'FLASH_SALE_STARTED')  icon = '<i class="fa-solid fa-bolt" style="color:#ffc107;"></i>';
+                else if (n.type === 'VOUCHER_NEW')         icon = '<i class="fa-solid fa-ticket" style="color:#20c997;"></i>';
+                else if (n.type === 'VOUCHER_EXPIRING')    icon = '<i class="fa-solid fa-clock" style="color:#fd7e14;"></i>';
 
                 html += '<div id="noti-' + notiId + '"style="display:flex;gap:12px;align-items:flex-start;padding:16px;margin-bottom:4px;border-bottom:1px solid #eee;border-radius:6px;cursor:pointer;' + unreadStyle + '" '
                     + 'onclick="markReadAndGo(' + notiId + ')">'

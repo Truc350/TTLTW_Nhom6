@@ -325,3 +325,57 @@ body {
 .table-wrapper table td:nth-child(3) {
     width: 100px;
 }
+.action-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.more-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #555;
+}
+
+.more-btn:hover {
+    background: #f0f0f0;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    z-index: 100;
+    min-width: 130px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-container.active .dropdown-menu {
+    display: flex;
+}
+
+.dropdown-menu label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}

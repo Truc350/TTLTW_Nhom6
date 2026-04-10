@@ -22,7 +22,8 @@ public class FacebookLoginServlet extends HttpServlet {
         String facebookLoginUrl = "https://www.facebook.com/v19.0/dialog/oauth"
                 + "?client_id=" + APP_ID
                 + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8)
-                + "&scope=public_profile,email";
+                + "&scope=public_profile,email"
+                + "&response_type=code";
 
         response.sendRedirect(facebookLoginUrl);
     }

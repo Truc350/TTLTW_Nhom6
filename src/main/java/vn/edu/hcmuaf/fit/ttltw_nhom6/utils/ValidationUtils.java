@@ -7,10 +7,25 @@ public class ValidationUtils {
     private static final String PHONE_REGEX = "^(0[35789])[0-9]{8}$";
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{8,}$";
     private static final String NAME_REGEX = "^[\\p{L}\\s]+$";
+    private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]{3,30}$";
+
+    public static String normalizePhone(String phone) {
+        if (isBlank(phone)) return null;
+        String normalized = phone.trim().replaceAll("\\s+", "");
+        if (normalized.startsWith("+84")) {
+            normalized = "0" + normalized.substring(3);
+        }
+        return normalized;
+    }
 
 
     public static boolean isValidPhone(String phone) {
-        return !isBlank(phone) && phone.matches(PHONE_REGEX);
+        String normalized = normalizePhone(phone);
+        return normalized != null && normalized.matches(PHONE_REGEX);
+    }
+
+    public static boolean isValidUsername(String username) {
+        return !isBlank(username) && username.matches(USERNAME_REGEX);
     }
 
     public static boolean isBlank(String... values) {
@@ -60,7 +75,6 @@ public class ValidationUtils {
         return !isBlank(houseNumber, district, province);
     }
 
-    //    validate cap nhat thon tin ca nhan
     public static ValidationResult validateUpdateProfile(String ho, String ten,
                                                          String phone, String email,
                                                          String gender,
@@ -102,31 +116,26 @@ public class ValidationUtils {
         return result;
     }
 
-    public static ValidationResult validateRegister(
-            String ho, String ten, String email,
-            String phone, String password, String confirmPassword
-    ) {
+    public static ValidationResult validateRegister(String username, String email, String phone, String password, String confirmPassword) {
         ValidationResult result = new ValidationResult();
-
-        if (!isValidName(ho))
-            result.addError("ho", "Họ không hợp lệ");
-
-        if (!isValidName(ten))
-            result.addError("ten", "Tên không hợp lệ");
-
-        if (!isValidEmail(email))
-            result.addError("email", "Email không hợp lệ");
-
-        if (!isValidPhone(phone))
-            result.addError("phone", "Số điện thoại không hợp lệ");
-
+        if (!isValidUsername(username))
+            result.addError("username", "Tên đăng nhập chỉ gồm chữ, số, dấu gạch dưới (3–30 ký tự)");
+        boolean emailFilled = !isBlank(email);
+        boolean phoneFilled = !isBlank(phone);
+        if (!emailFilled && !phoneFilled) {
+            result.addError("emailPhone", "Vui lòng nhập ít nhất email hoặc số điện thoại");
+        } else {
+            if (emailFilled && !isValidEmail(email))
+                result.addError("email", "Email không đúng định dạng");
+            if (phoneFilled && !isValidPhone(phone))
+                result.addError("phone", "Số điện thoại không hợp lệ (VD: 0912345678 hoặc +84912345678)");
+        }
         if (!isValidPassword(password))
             result.addError("password",
                     "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và ký tự đặc biệt");
-
-        if (!password.equals(confirmPassword))
+        if (isBlank(confirmPassword) || !confirmPassword.equals(password))
             result.addError("confirmPassword", "Xác nhận mật khẩu không khớp");
-
         return result;
     }
+
 }

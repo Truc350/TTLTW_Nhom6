@@ -22,88 +22,71 @@ public class RegisterServlet extends HttpServlet {
         userDao = new UserDao(JdbiConnector.get());
     }
 
+    private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String error)
+            throws ServletException, IOException {
+        request.setAttribute("error", error);
+        request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+    }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String username = request.getParameter("username");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String password = request.getParameter("password");
+        String username        = request.getParameter("username");
+        String email           = request.getParameter("email");
+        String phone           = request.getParameter("phone");
+        String password        = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
-
-        if (ValidationUtils.isBlank(username)
-                || ValidationUtils.isBlank(password) || ValidationUtils.isBlank(confirmPassword)) {
-            request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+        if (!ValidationUtils.isValidUsername(username)) {
+            forwardWithError(request, response,
+                    "Tên đăng nhập chỉ gồm chữ, số, dấu gạch dưới (3–30 ký tự)!");
             return;
         }
         if (!ValidationUtils.isAtLeastOne(email, phone)) {
-            request.setAttribute("error", "Vui lòng nhập ít nhất email hoặc số điện thoại!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response,
+                    "Vui lòng nhập ít nhất email hoặc số điện thoại!");
             return;
         }
         if (!ValidationUtils.isBlank(email) && !ValidationUtils.isValidEmail(email)) {
-            request.setAttribute("error", "Email không đúng định dạng!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response, "Email không đúng định dạng!");
             return;
         }
         if (!ValidationUtils.isBlank(phone) && !ValidationUtils.isValidPhone(phone)) {
-            request.setAttribute("error", "Số điện thoại không đúng định dạng (VD: 0912345678)");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response,
+                    "Số điện thoại không đúng định dạng (VD: 0912345678)!");
             return;
         }
-
-
-        // Kiểm tra mật khẩu khớp
+        if (!ValidationUtils.isValidPassword(password)) {
+            forwardWithError(request, response,
+                    "Mật khẩu phải ít nhất 8 ký tự, gồm chữ hoa, chữ thường và ký tự đặc biệt!");
+            return;
+        }
         if (!password.equals(confirmPassword)) {
-            request.setAttribute("error", "Mật khẩu không khớp!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response, "Mật khẩu xác nhận không khớp!");
             return;
         }
-
-        // Kiểm tra format mật khẩu
-        if (!PasswordUtils.isValidPasswordFormat(password)) {
-            request.setAttribute("error", "Mật khẩu phải ít nhất 8 ký tự, chữ hoa, thường, số và ký tự đặc biệt!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
-            return;
-        }
-
-        // Kiểm tra username/email đã tồn tại
         if (userDao.findByUsername(username).isPresent()) {
-            request.setAttribute("error", "Tên đăng nhập đã tồn tại!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response, "Tên đăng nhập đã tồn tại!");
             return;
         }
         if (!ValidationUtils.isBlank(phone) && userDao.findByPhone(phone).isPresent()) {
-            request.setAttribute("error", "Số điện thoại đã được sử dụng!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response, "Số điện thoại đã được sử dụng!");
             return;
         }
-
         if (!ValidationUtils.isBlank(email) && userDao.findByEmail(email).isPresent()) {
-            request.setAttribute("error", "Email đã được sử dụng!");
-            request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
+            forwardWithError(request, response, "Email đã được sử dụng!");
             return;
         }
-
-        // Hash mật khẩu và lưu
         String passwordHash = PasswordUtils.hashPassword(password);
-
         User user = new User();
         user.setUsername(username);
         user.setEmail(ValidationUtils.isBlank(email) ? null : email);
         user.setPhone(ValidationUtils.isBlank(phone) ? null : phone);
         user.setPasswordHash(passwordHash);
         user.setFullName(username);
-
-        // Sau khi insert user thành công
         userDao.insert(user);
         request.setAttribute("success", true);
         request.getRequestDispatcher("/frontend/public/Register.jsp").forward(request, response);
-
     }
-
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

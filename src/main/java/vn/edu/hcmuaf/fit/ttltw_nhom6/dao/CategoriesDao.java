@@ -424,11 +424,10 @@ public class CategoriesDao {
      */
     public boolean toggleHidden(int id, int hidden) {
         String sql = """
-                    UPDATE categories 
-                    SET is_hidden = :hidden 
-                    WHERE id = :id AND is_deleted = 0
-                """;
-
+            UPDATE categories 
+            SET is_hidden = :hidden 
+            WHERE id = :id AND is_deleted = 0
+            """;
         try {
             int rows = jdbi.withHandle(handle ->
                     handle.createUpdate(sql)
@@ -436,6 +435,9 @@ public class CategoriesDao {
                             .bind("hidden", hidden)
                             .execute()
             );
+            if (rows > 0) {
+                hideComicsByCategory(id, hidden); // ẩn/hiện comic theo
+            }
             return rows > 0;
         } catch (Exception e) {
             System.err.println("Error toggling category hidden status:");
@@ -501,7 +503,26 @@ public class CategoriesDao {
             System.out.println("FAILED - returned null");
         }
     }
-
+    public boolean hideComicsByCategory(int categoryId, int hidden) {
+        String sql = """
+            UPDATE comics 
+            SET is_hidden = :hidden 
+            WHERE category_id = :categoryId AND is_deleted = 0
+            """;
+        try {
+            int rows = jdbi.withHandle(handle ->
+                    handle.createUpdate(sql)
+                            .bind("categoryId", categoryId)
+                            .bind("hidden", hidden)
+                            .execute()
+            );
+            return rows >= 0;
+        } catch (Exception e) {
+            System.err.println("Error hiding comics by category:");
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
 }

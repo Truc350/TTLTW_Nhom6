@@ -190,24 +190,42 @@ function updateCategoryTable(categories) {
     let html = '';
     categories.forEach(category => {
         const escapedName = escapeHtml(category.nameCategories || '-');
+        const isHidden = category.is_hidden === 1 || category.is_hidden === true;
         html += `
             <tr>
                 <td>${category.id}</td>
                 <td>${escapedName}</td>
                 <td class="action-cell">
-                    <button class="edit-category-btn" 
-                            data-id="${category.id}" 
-                            onclick="openEditPopup(${category.id})"
-                            title="Chỉnh sửa">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button class="delete-category-btn" 
-                            data-id="${category.id}" 
-                            data-name="${escapedName}"
-                            onclick="openDeletePopup(${category.id}, '${escapedName.replace(/'/g, "\\'")}')"
-                            title="Xóa">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <div class="action-wrapper">
+                        <button class="edit-category-btn" 
+                                data-id="${category.id}" 
+                                onclick="openEditPopup(${category.id})"
+                                title="Chỉnh sửa">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="delete-category-btn" 
+                                data-id="${category.id}" 
+                                data-name="${escapedName}"
+                                onclick="openDeletePopup(${category.id}, '${escapedName.replace(/'/g, "\\'")}')"
+                                title="Xóa">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        <div class="menu-container" id="menu-cat-${category.id}">
+                            <button class="more-btn" onclick="toggleCategoryMenu(${category.id})">⋮</button>
+                            <div class="dropdown-menu">
+                                <label>
+                                    <input type="radio" name="display_CAT${category.id}"
+                                           value="show" ${!isHidden ? 'checked' : ''}
+                                           onchange="toggleCategoryHidden(${category.id}, 'show')"> Hiển thị
+                                </label>
+                                <label>
+                                    <input type="radio" name="display_CAT${category.id}"
+                                           value="hide" ${isHidden ? 'checked' : ''}
+                                           onchange="toggleCategoryHidden(${category.id}, 'hide')"> Ẩn đi
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </td>
             </tr>
         `;
@@ -698,6 +716,43 @@ function initEditEventListeners() {
         });
     }
 }
+function toggleCategoryMenu(id) {
+    const container = document.getElementById(`menu-cat-${id}`);
+    document.querySelectorAll('.menu-container').forEach(m => {
+        if (m !== container) m.classList.remove('active');
+    });
+    container.classList.toggle('active');
+}
+
+function toggleCategoryHidden(id, action) {
+    const contextPath = getContextPath();
+    fetch(`${contextPath}/admin/CategoryManagement`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({id: id, action: action})
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(action === 'hide' ? 'Đã ẩn thể loại!' : 'Đã hiển thị thể loại!', 'success');
+                const container = document.getElementById(`menu-cat-${id}`);
+                if (container) container.classList.remove('active');
+            } else {
+                showMessage('Có lỗi khi cập nhật!', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Toggle hidden error:', err);
+            showMessage('Không thể kết nối đến server!', 'error');
+        });
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.menu-container')) {
+        document.querySelectorAll('.menu-container').forEach(m => m.classList.remove('active'));
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     initEventListeners();
     initEditEventListeners();

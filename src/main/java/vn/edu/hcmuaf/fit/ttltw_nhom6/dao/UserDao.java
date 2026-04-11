@@ -50,6 +50,8 @@ public class UserDao {
         );
     }
 
+
+
     //   2 cái này cho đăng kí nó trùng username hay mail nó khỏi error 500
     public Optional<User> findByUsername(String username) {
         return jdbi.withHandle(handle ->
@@ -68,8 +70,6 @@ public class UserDao {
                         .findOne()
         );
     }
-
-
     // Update mật khẩu theo email của authen
     public void updatePassword(String email, String newPasswordHash) {
         jdbi.useHandle(handle ->
@@ -494,4 +494,12 @@ public class UserDao {
                 );
     }
 
+    public boolean updateAvatar(int userId, String avatarUrl) {
+        return jdbi.withHandle(handle ->
+                handle.createUpdate("UPDATE users SET avatar_url = :avatar, updated_at = NOW() WHERE id = :id")
+                        .bind("avatar", avatarUrl)
+                        .bind("id", userId)
+                        .execute() > 0
+        );
+    }
 }

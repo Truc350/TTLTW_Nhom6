@@ -3,28 +3,33 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<c:set var="currentUser" value="${sessionScope.currentUser}" />
+<c:set var="currentUser" value="${sessionScope.currentUser}"/>
 <c:if test="${empty currentUser}">
-    <c:redirect url="${pageContext.request.contextPath}/login" />
+    <c:redirect url="${pageContext.request.contextPath}/login"/>
 </c:if>
-<c:set var="currentURI" value="${pageContext.request.requestURI}" />
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="currentURI" value="${pageContext.request.requestURI}"/>
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <div class="profile-container">
     <div class="profile-header">
-        <div class="avatar">
-            <c:choose>
-                <c:when test="${not empty currentUser.avatarUrl}">
-                    <img src="${currentUser.avatarUrl}" alt="${currentUser.fullName}">
-                </c:when>
-                <c:when test="${currentUser.gender == 'female'}">
-                    <img src="https://mayweddingstudio.vn/wp-content/uploads/anh-dai-dien-facebook-nu-9.webp" alt="Avatar">
-                </c:when>
-                <c:otherwise>
-                    <img src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg" alt="Avatar">
-                </c:otherwise>
-            </c:choose>
-        </div>
+        <form id="avatarForm" action="${contextPath}/upload-avatar" method="post" enctype="multipart/form-data">
+            <div class="avatar" style="cursor: pointer;">
+                <c:choose>
+                    <c:when test="${not empty currentUser.avatarUrl}">
+                        <img src="${currentUser.avatarUrl}" alt="${currentUser.fullName}">
+                    </c:when>
+                    <c:when test="${currentUser.gender == 'female'}">
+                        <img src="https://mayweddingstudio.vn/wp-content/uploads/anh-dai-dien-facebook-nu-9.webp"
+                             alt="Avatar">
+                    </c:when>
+                    <c:otherwise>
+                        <img src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg"
+                             alt="Avatar">
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            <input type="file" id="avatarInput" name="avatar" accept="image/*" hidden>
+        </form>
         <div class="user-info">
             <h2>${not empty currentUser.fullName ? currentUser.fullName : currentUser.username}</h2>
             <p class="membership">
@@ -63,7 +68,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const currentPath = window.location.pathname;
         const menuItems = document.querySelectorAll(".menu ul li");
         let hasActive = false;
@@ -81,5 +86,27 @@
                 }
             });
         }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function (){
+        const avatar = document.querySelector(".avatar");
+        const input = document.getElementById("avatarInput");
+        const preview = document.getElementById("avatarPreview");
+        const form = document.getElementById("avatarForm");
+        avatar.addEventListener("click", () => {
+            input.click();
+        });
+        input.addEventListener("change",()=>{
+            const  file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            form.submit();
+        });
+
     });
 </script>

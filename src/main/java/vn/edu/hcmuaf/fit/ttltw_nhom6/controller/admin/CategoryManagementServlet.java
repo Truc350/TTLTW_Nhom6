@@ -5,14 +5,16 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CategoriesDao;
 
 import java.io.IOException;
 
     @WebServlet("/admin/CategoryManagement")
 public class CategoryManagementServlet extends HttpServlet {
-
+        private CategoriesDao categoriesDao;
     @Override
     public void init() throws ServletException {
+        categoriesDao = new CategoriesDao();
     }
 
     @Override
@@ -49,6 +51,33 @@ public class CategoryManagementServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        String idParam = request.getParameter("id");
+        String action = request.getParameter("action"); // "show" hoặc "hide
+        if (idParam != null && action != null) {
+            try {
+                int id = Integer.parseInt(idParam);
+                int hidden = "hide".equals(action) ? 1 : 0;
+
+                boolean success = categoriesDao.toggleHidden(id, hidden);
+
+                response.setContentType("application/json; charset=UTF-8");
+                if (success) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write("{\"success\": true}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.getWriter().write("{\"success\": false}");
+                }
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+                return;
+            }
+        }
         doGet(request, response);
     }
 }

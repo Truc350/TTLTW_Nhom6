@@ -52,12 +52,21 @@ input{
     outline: none;
 }
 input.valid{
-    border-color: #28a745;
+    border :1px solid #28a745;
+    outline: none;
 }
 input.invalid{
-    border-color: #dc3545;
+    border: 2px solid #dc3545;
+    outline: none;
 }
-
+input.valid:focus{
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+input.invalid:focus{
+    border-color: #e53935;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.15);
+}
 input:focus{
     border-color: #0276DA;
 }

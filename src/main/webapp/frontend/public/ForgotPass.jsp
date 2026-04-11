@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/frontend/css/publicCss/ForgotPassword.css">
 </head>
 <body>
-
 <div class="container">
     <div class="left">
         <div class="box">
@@ -75,8 +74,6 @@
         popup.style.display = "flex";
     }
     </c:if>
-
-
     const emailInput = document.getElementById("emailInput");
     function validateEmail() {
         const value = emailInput.value.trim();
@@ -96,6 +93,5 @@
     emailInput.addEventListener("input", validateEmail);
     emailInput.addEventListener("blur", validateEmail);
 </script>
-
 </body>
 </html>

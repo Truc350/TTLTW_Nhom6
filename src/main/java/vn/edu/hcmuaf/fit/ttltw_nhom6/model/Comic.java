@@ -70,6 +70,16 @@ public class Comic {
 
     @ColumnName("has_flash_sale")
     private boolean hasFlashSale;
+    @ColumnName("damaged_quantity")
+    private Integer damagedQuantity;
+
+    public Integer getDamagedQuantity() {
+        return damagedQuantity;
+    }
+
+    public void setDamagedQuantity(Integer damagedQuantity) {
+        this.damagedQuantity = damagedQuantity;
+    }
 
     public Integer getFlashSaleId() {
         return flashSaleId;

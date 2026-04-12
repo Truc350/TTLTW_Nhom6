@@ -39,6 +39,21 @@ public class CartItem {
         this.flashSalePrice  = flashSalePrice;
     }
 
+    public CartItem(int id, int cartId, Comic comic, int quantity,
+                    Double priceAtPurchase, Double flashSalePrice,  // Double thay vì double
+                    Integer flashSaleId,
+                    LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id              = id;
+        this.cartId          = cartId;
+        this.comic           = comic;
+        this.quantity        = quantity;
+        this.priceAtPurchase = priceAtPurchase;
+        this.flashSalePrice  = flashSalePrice;
+        this.flashSaleId     = flashSaleId;
+        this.createdAt       = createdAt;
+        this.updatedAt       = updatedAt;
+    }
+
     public boolean isInFlashSale() {
         return flashSaleId != null && flashSalePrice != null;
     }

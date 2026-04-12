@@ -528,13 +528,14 @@
     function showTab(index, saveState = true) {
         tabs.forEach(t => t.classList.remove("active"));
         if (tabs[index]) tabs[index].classList.add("active");
-
         tabContents.forEach((c, i) => {
             c.style.display = (i === index) ? "" : "none";
         });
-
         if (saveState && typeof saveCurrentTab === 'function') {
             saveCurrentTab(index);
+        }
+        if (typeof loadTabIfNeeded === 'function') {
+            loadTabIfNeeded(index);
         }
     }
 

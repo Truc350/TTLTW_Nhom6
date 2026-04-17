@@ -19,7 +19,7 @@ public class CartDAO {
     public int getOrCreateCartByUserId(int userId) {
         return jdbi.withHandle(handle -> {
            Optional<Integer> cartId = handle.createQuery(
-                   "SELECT  id FROM cart"+
+                   "SELECT id FROM cart "+
                            "WHERE user_id = :uid AND status = 'active' "+
                            "LIMIT 1").bind("uid", userId).mapTo(Integer.class).findOne();
            if (cartId.isPresent()) return  cartId.get();
@@ -33,6 +33,7 @@ public class CartDAO {
         });
     }
     public int getOrCreateCartBySessionId(String sessionId) {
+        System.out.println("[DEBUG] getOrCreateCartBySessionId called, sessionId=" + sessionId);
         return jdbi.withHandle(handle -> {
             Optional<Integer> cartId = handle
                     .createQuery(
@@ -159,33 +160,33 @@ public class CartDAO {
     public List<CartItem> getCartItems(int cartId) {
         return JdbiConnector.get().withHandle(handle ->
                 handle.createQuery("""
-                        SELECT
-                            ci.id              AS cart_item_id,
-                            ci.cart_id,
-                            ci.quantity,
-                            ci.price_at_purchase,
-                            ci.flash_sale_price,
-                            ci.flash_sale_id,
-                            ci.created_at,
-                            ci.updated_at,
-                            c.id               AS comic_id,
-                            c.name_comics,
-                            c.author,
-                            c.publisher,
-                            c.price,
-                            c.stock_quantity,
-                            c.status,
-                            c.thumbnail_url,
-                            c.discount_percent,
-                            COALESCE(c.damaged_quantity, 0) AS damaged_quantity
-                        FROM cart_item ci
-                        JOIN comics c ON ci.comic_id = c.id
-                        WHERE ci.cart_id  = :cartId
-                          AND c.status    = 'active'
-                          AND c.is_hidden = 0
-                          AND c.is_deleted = 0
-                        ORDER BY ci.created_at DESC
-                    """)
+                    SELECT
+                        ci.id              AS cart_item_id,
+                        ci.cart_id,
+                        ci.quantity,
+                        ci.price_at_purchase,
+                        ci.flash_sale_price,
+                        ci.flash_sale_id,
+                        ci.created_at,
+                        ci.updated_at,
+                        c.id               AS comic_id,
+                        c.name_comics,
+                        c.author,
+                        c.publisher,
+                        c.price,
+                        c.stock_quantity,
+                        c.status,
+                        c.thumbnail_url,
+                        c.discount_percent,
+                        COALESCE(c.damaged_quantity, 0) AS damaged_quantity
+                    FROM cart_item ci
+                    JOIN comics c ON ci.comic_id = c.id
+                    WHERE ci.cart_id  = :cartId
+                      AND c.status    = 'active'
+                      AND c.is_hidden = 0
+                      AND c.is_deleted = 0
+                    ORDER BY ci.created_at DESC
+                """)
                         .bind("cartId", cartId)
                         .map((rs, ctx) -> {
                             Comic comic = new Comic();

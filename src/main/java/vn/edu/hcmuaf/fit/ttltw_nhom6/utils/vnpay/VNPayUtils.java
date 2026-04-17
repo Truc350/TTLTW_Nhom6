@@ -7,16 +7,28 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class VNPayUtils {
-    public static final String VNP_TMN_CODE = "PRKE87PB";
-    public static final String VNP_HASH_SECRET = "4X9G4D9M04WW2I7WICWIZ7DZS4V1G3MF";
+    public static  String VNP_TMN_CODE = "PRKE87PB";
+    public static  String VNP_HASH_SECRET = "4X9G4D9M04WW2I7WICWIZ7DZS4V1G3MF";
     public static final String VNP_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static final String VNP_VERSION = "2.1.0";
     public static final String VNP_COMMAND = "pay";
     public static final String VNP_CURRENCY = "VND";
     public static final String VNP_LOCALE = "vn";
+
+    static {
+        try {
+            Properties prop = new Properties();
+            prop.load(VNPayUtils.class.getClassLoader().getResourceAsStream("vnpay.properties"));
+            VNP_TMN_CODE = prop.getProperty("vnp_TmnCode");
+            VNP_HASH_SECRET = prop.getProperty("vnp_HashSecret ");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static String createPaymentUrl(int orderId, long amount, String orderInfo, String returnUrl, String ipAddress) {
         // tao ma giao dich duy nhat

@@ -27,13 +27,15 @@ public class CartFlashSaleUpdateFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String uri = httpRequest.getRequestURI();
+        if (uri.contains("/login") || uri.contains("/logout")) {
+            chain.doFilter(request, response);
+            return;
+        }
         HttpSession session = httpRequest.getSession(false);
-
         if (session != null) {
             Cart cart = (Cart) session.getAttribute("cart");
-
             if (cart != null && !cart.getItems().isEmpty()) {
                 updateCartFlashSalePrices(cart);
                 session.setAttribute("cart", cart);

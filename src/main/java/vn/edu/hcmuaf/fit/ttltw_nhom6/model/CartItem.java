@@ -11,7 +11,6 @@ public class CartItem {
     private int     quantity;
     private Double  priceAtPurchase;
     private Double  flashSalePrice;
-
     private Integer flashSaleId;
 
     public CartItem(Comic comic, int quantity) {

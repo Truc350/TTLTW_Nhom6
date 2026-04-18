@@ -20,83 +20,80 @@ import java.util.Optional;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-    private UserDao    userDao;
+    private UserDao     userDao;
     private CartService cartService;
+
     @Override
     public void init() {
         userDao     = new UserDao(JdbiConnector.get());
         cartService = new CartService();
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String usernameOrEmail = request.getParameter("username");
         String password        = request.getParameter("password");
-        // Validate format mật khẩu
+
         if (!PasswordUtils.isValidPasswordFormat(password)) {
-            request.setAttribute("error", "Mật khẩu ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+            request.setAttribute("error",
+                    "Mat khau it nhat 8 ky tu, gom chu hoa, chu thuong, so va ky tu dac biet!");
             request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
+
         Optional<User> userOpt = userDao.findByUsernameOrEmail(usernameOrEmail);
-        boolean isActive = userDao.isUserActive(userOpt);
-        if (!isActive) {
-            request.setAttribute("error", "Tài khoản của bạn đã bị khóa!");
+        if (!userDao.isUserActive(userOpt)) {
+            request.setAttribute("error", "Tai khoan cua ban da bi khoa!");
             request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             return;
         }
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
             if (PasswordUtils.verifyPassword(password, user.getPasswordHash())) {
                 OrderViolationService.getInstance().resetLoginFailureCount(user.getId());
-                HttpSession oldSession = request.getSession(false);
-                String guestSessionId = null;
-//                Cart guestCart = null;
+
+                // BUOC 1: Lay guestSessionId TRUOC KHI invalidate session cu.
+                // Cart guest da duoc luu xuong DB boi CartSevlet,
+                // nen chi can sessionId de tra cuu trong DB, khong can cart object.
+                HttpSession oldSession     = request.getSession(false);
+                String      guestSessionId = null;
                 if (oldSession != null) {
                     guestSessionId = oldSession.getId();
-
-                    Cart guestCart = (Cart) oldSession.getAttribute("cart");
-                    if (guestCart != null && !guestCart.getItems().isEmpty()) {
-                        // Lưu từng item vào DB với sessionId này
-                        for (CartItem item : guestCart.getItems()) {
-                            cartService.addToCart(
-                                    guestCart,
-                                    null,
-                                    guestSessionId,
-                                    item.getComic().getId(),
-                                    item.getQuantity()
-                            );
-                        }
-                    }
-
-                    guestSessionId = oldSession.getId();
-//                    guestCart = (Cart) oldSession.getAttribute("cart");
-                    oldSession.invalidate(); // Hủy session cũ (bảo mật)
+                    oldSession.invalidate();
                 }
+
+                // BUOC 2: Tao session moi
                 HttpSession newSession = request.getSession(true);
-                // Admin → không cần cart
+
+                // Admin khong can cart
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     newSession.setAttribute("currentUser", user);
-                    newSession.setAttribute("userId", user.getId());
-                    newSession.setAttribute("isAdmin", true);
+                    newSession.setAttribute("userId",      user.getId());
+                    newSession.setAttribute("isAdmin",     true);
                     setNoCacheHeaders(response);
                     response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                     return;
                 }
 
+                // BUOC 3: Merge guest cart (DB) vao user cart (DB)
+                // CartDAO.mergeCart doc guest cart theo guestSessionId,
+                // gop vao user cart, roi xoa guest cart.
                 Cart userCart = new Cart();
                 if (guestSessionId != null) {
                     cartService.mergeCart(userCart, user.getId(), guestSessionId);
                 } else {
                     cartService.getCart(userCart, user.getId(), newSession.getId());
                 }
-                newSession.setAttribute("cart",userCart);
-                newSession.setAttribute("currentUser", user);
+
+                newSession.setAttribute("cart",                  userCart);
+                newSession.setAttribute("currentUser",           user);
                 newSession.setAttribute("clearCartLocalStorage", true);
 
                 setNoCacheHeaders(response);
-                // Redirect sau login
                 String redirectUrl = (String) newSession.getAttribute("redirectAfterLogin");
                 if (redirectUrl != null) {
                     newSession.removeAttribute("redirectAfterLogin");
@@ -106,16 +103,14 @@ public class LoginServlet extends HttpServlet {
                 }
 
             } else {
-                // Sai mật khẩu
                 OrderViolationService.getInstance().incrementLoginFailureCount(usernameOrEmail);
                 OrderViolationService.getInstance().checkLoginFailureViolation(usernameOrEmail);
-
-                request.setAttribute("error", "Hãy nhập đúng tài khoản và mật khẩu!");
+                request.setAttribute("error", "Hay nhap dung tai khoan va mat khau!");
                 request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
             }
 
         } else {
-            request.setAttribute("error", "Hãy nhập đúng tài khoản và mật khẩu!");
+            request.setAttribute("error", "Hay nhap dung tai khoan va mat khau!");
             request.getRequestDispatcher("/frontend/public/login.jsp").forward(request, response);
         }
     }
@@ -132,7 +127,7 @@ public class LoginServlet extends HttpServlet {
 
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
+        response.setHeader("Pragma",        "no-cache");
+        response.setDateHeader("Expires",   0);
     }
 }

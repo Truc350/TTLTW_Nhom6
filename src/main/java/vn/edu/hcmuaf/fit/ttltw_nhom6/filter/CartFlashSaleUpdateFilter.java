@@ -16,23 +16,26 @@ import java.util.Map;
 public class CartFlashSaleUpdateFilter implements Filter {
 
     private FlashSaleComicsDAO flashSaleComicsDAO;
-    private FlashSaleDAO flashSaleDAO;
+    private FlashSaleDAO       flashSaleDAO;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         flashSaleComicsDAO = new FlashSaleComicsDAO();
-        flashSaleDAO = new FlashSaleDAO();
+        flashSaleDAO       = new FlashSaleDAO();
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String uri = httpRequest.getRequestURI();
+
         if (uri.contains("/login") || uri.contains("/logout")) {
             chain.doFilter(request, response);
             return;
         }
+
         HttpSession session = httpRequest.getSession(false);
         if (session != null) {
             Cart cart = (Cart) session.getAttribute("cart");
@@ -55,27 +58,26 @@ public class CartFlashSaleUpdateFilter implements Filter {
                     flashSaleComicsDAO.getFlashSaleInfoByComicId(comicId);
 
             if (activeFlashSale != null) {
-                // Comic đang trong Flash Sale active
                 Integer newFlashSaleId = (Integer) activeFlashSale.get("flashsale_id");
-                Object discountObj = activeFlashSale.get("discount_percent");
-                Double discountPercent = (discountObj instanceof Number)
-                        ? ((Number) discountObj).doubleValue()
-                        : null;
+                Object  discountObj    = activeFlashSale.get("discount_percent");
+                Double  discountPercent = (discountObj instanceof Number)
+                        ? ((Number) discountObj).doubleValue() : null;
 
                 if (discountPercent != null) {
-                    Double newFlashSalePrice = item.getComic().getPrice() * (1 - discountPercent / 100.0);
+                    double newFlashSalePrice =
+                            item.getComic().getPrice() * (1 - discountPercent / 100.0);
 
-                    // Cập nhật nếu khác với giá hiện tại
-                    if (!newFlashSaleId.equals(item.getFlashSaleId()) ||
-                            Math.abs(newFlashSalePrice - item.getPriceAtPurchase()) > 0.01) {
+                    boolean flashSaleChanged = !newFlashSaleId.equals(item.getFlashSaleId());
+                    boolean priceChanged = item.getFlashSalePrice() == null
+                            || Math.abs(item.getFlashSalePrice() - newFlashSalePrice) > 0.01;
 
+                    if (flashSaleChanged || priceChanged) {
+                        // SỬA: dùng đúng field flashSalePrice thay vì priceAtPurchase
                         item.setFlashSaleId(newFlashSaleId);
-                        item.setPriceAtPurchase(newFlashSalePrice);
-
+                        item.setFlashSalePrice(newFlashSalePrice);
                     }
                 }
             } else {
-                // Comic KHÔNG còn trong Flash Sale active
                 if (item.isInFlashSale()) {
                     item.removeFlashSale();
                 }

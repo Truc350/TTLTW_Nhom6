@@ -1121,3 +1121,55 @@ body {
     background: #f0f0f0;
     color: #444;
 }
+
+/* truyen hết hàng */
+.out-of-stock-item {
+    opacity: 0.7;
+    background: #fafafa;
+}
+
+.img-faded {
+    filter: grayscale(60%);
+}
+
+.title-faded {
+    color: #999;
+}
+
+.out-of-stock-notice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.out-of-stock-notice i {
+    font-size: 14px;
+}
+
+.out-of-stock-notice a {
+    color: #c0392b;
+    font-weight: 600;
+    text-decoration: underline;
+    margin-left: 4px;
+}
+
+.out-of-stock-notice a:hover {
+    color: #e74c3c;
+    text-decoration: underline;
+}
+
+.item-checkbox:disabled {
+    accent-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.quantity-btn:disabled {
+    background: #eee;
+    color: #bbb;
+    cursor: not-allowed;
+    border-color: #ddd;
+}

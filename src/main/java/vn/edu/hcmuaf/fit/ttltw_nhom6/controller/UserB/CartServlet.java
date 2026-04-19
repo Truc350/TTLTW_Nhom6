@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @WebServlet("/cart")
-public class CartSevlet extends HttpServlet {
+public class CartServlet extends HttpServlet {
     private CartService cartService;  // THÊM MỚI
 
     @Override
@@ -229,24 +229,6 @@ public class CartSevlet extends HttpServlet {
             Comic        comic        = comicService.getComicById(comicId);
 
             if (comic != null) {
-                // Kiểm tra tồn kho trước (nhanh, không cần xuống DB)
-                CartItem existingItem  = cart.get(comicId);
-                int      totalQuantity = (existingItem != null)
-                        ? existingItem.getQuantity() + quantity : quantity;
-
-                if (comic.getStockQuantity() < totalQuantity) {
-                    session.setAttribute("errorMsg",
-                            "Sản phẩm không đủ hàng. Chỉ còn " + comic.getStockQuantity() + " sản phẩm.");
-
-                    if (isAjax) {
-                        response.setContentType("application/json");
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không đủ hàng\"}");
-                        return;
-                    }
-                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
-                    return;
-                }
 
                 // Lấy thông tin Flash Sale (để hiển thị message)
                 FlashSaleComicsDAO  flashSaleComicsDAO = new FlashSaleComicsDAO();
@@ -266,11 +248,33 @@ public class CartSevlet extends HttpServlet {
                 Integer userId      = (currentUser != null) ? currentUser.getId() : null;
 
                 String result = cartService.addToCart(cart, userId, session.getId(), comicId, quantity);
-                // cart đã được refresh từ DB bên trong cartService
-                System.out.println("[CartServlet] after addToCart: result=" + result
-                        + " cart.size=" + cart.getItems().size()
-                        + " cart.id=" + cart.getId());
                 session.setAttribute("cart", cart);
+
+                if ("-1".equals(result) || "not_found".equals(result)) {
+                    // Sản phẩm không tồn tại / bị ẩn / bị xóa
+                    session.setAttribute("errorMsg", "Sản phẩm không tồn tại hoặc đã bị ẩn");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không tồn tại\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
+
+                if ("out_of_stock".equals(result)) {
+                    // Hết hàng hoàn toàn (available <= 0)
+                    session.setAttribute("errorMsg", "Sản phẩm đã hết hàng");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm đã hết hàng\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
 
                 // Xây dựng message
                 String successMsg = "Đã thêm \"" + comic.getNameComics() + "\" vào giỏ hàng!";
@@ -280,18 +284,6 @@ public class CartSevlet extends HttpServlet {
                     successMsg += " (Giá ưu đãi: " + String.format("%,.0f", comic.getDiscountPrice()) + "₫)";
                 }
                 session.setAttribute("successMsg", successMsg);
-
-                if ("out_of_stock".equals(result)) {
-                    session.setAttribute("errorMsg", "Sản phẩm không đủ hàng");
-                    if (isAjax) {
-                        response.setContentType("application/json");
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không đủ hàng\"}");
-                        return;
-                    }
-                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
-                    return;
-                }
 
                 if (isAjax) {
                     response.setContentType("application/json");

@@ -176,16 +176,8 @@
                             </div>
                         </div>
                         <span class="item-price">
-                            <c:choose>
-                                <c:when test="${item.flashSalePrice != null}">
-                                    <fmt:formatNumber value="${item.flashSalePrice * item.quantity}"
-                                                      type="number" groupingUsed="true"/> đ
-                                </c:when>
-                                <c:otherwise>
-                                    <fmt:formatNumber value="${item.comic.discountPrice * item.quantity}"
-                                                      type="number" groupingUsed="true"/> đ
-                                </c:otherwise>
-                            </c:choose>
+                            <fmt:formatNumber value="${item.finalPrice * item.quantity}"
+                                              type="number" groupingUsed="true"/> đ
                         </span>
                     </div>
                 </c:forEach>

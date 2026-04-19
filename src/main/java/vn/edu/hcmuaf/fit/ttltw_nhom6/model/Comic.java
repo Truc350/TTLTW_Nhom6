@@ -43,7 +43,7 @@ public class Comic {
     private LocalDateTime updatedAt;
     @ColumnName("totalSold")
     private int totalSold; // lượt bán trong tuần
-
+    @ColumnName("discount_percent")
     private Double discountPercent;
     @ColumnName("series_name")
     private String seriesName;

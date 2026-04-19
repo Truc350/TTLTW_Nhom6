@@ -692,7 +692,10 @@ window.closeOrderDetailPopup = closeOrderDetailPopup;
     }
 
     function createReturnedRow(order) {
-        const returnStatus = order.return_status || order.returnStatus || '';
+        const returnStatus = order.return_status
+            || order.returnStatus
+            || order.status
+            || '';
         const isPending = returnStatus === 'Pending';
 
         let displayReason = order.reason || '';
@@ -701,13 +704,11 @@ window.closeOrderDetailPopup = closeOrderDetailPopup;
         }
 
         const actionButtons = isPending
-            ? `<button class="btn-refund" data-return-id="${order.return_id}" 
-                   onclick="confirmRefund(this)">Xác nhận hoàn tiền</button>
+            ? `<button class="btn-refund" data-return-id="${order.return_id}">Xác nhận hoàn tiền</button>
            <button class="btn-reject" 
                    data-return-id="${order.return_id}" 
                    data-order-code="${order.order_code || ''}" 
-                   data-customer="${order.customer_name || ''}" 
-                   onclick="openRejectPopup(this)">Từ chối</button>`
+                   data-customer="${order.customer_name || ''}">Từ chối</button>`
             : `<span style="color: #999;">-</span>`;
 
         return `
@@ -869,7 +870,16 @@ window.closeOrderDetailPopup = closeOrderDetailPopup;
             });
         }
         if (status === 'Returned') {
-
+            tbody.querySelectorAll('.btn-refund').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    window.confirmRefund(this);
+                });
+            });
+            tbody.querySelectorAll('.btn-reject').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    window.openRejectPopup(this);
+                });
+            });
         }
     }
 
@@ -1033,6 +1043,39 @@ window.closeOrderDetailPopup = closeOrderDetailPopup;
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        const savedTab = typeof getSavedTab === 'function' ? getSavedTab() : 0;
+        const returnTbody = document.getElementById('returnTableBody');
+        if (returnTbody) {
+            const hasJspData = returnTbody.querySelectorAll(
+                'tr:not([class*="pagination-row"]):not(.no-result-message)'
+            ).length > 0;
+
+            if (hasJspData) {
+                loadedTabs.add(4); // Ngăn lazy load xóa data JSP
+                initDynamicPagination('returnTableBody', 'returnPagination', 'return-page', 5);
+                // Attach events cho nút từ JSP
+                returnTbody.querySelectorAll('.btn-refund').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        window.confirmRefund(this);
+                    });
+                });
+                returnTbody.querySelectorAll('.btn-reject').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        window.openRejectPopup(this);
+                    });
+                });
+            }
+        }
+
+        const cancelledTbody = document.getElementById('cancelledTableBody');
+        if (cancelledTbody) {
+            const hasJspData = cancelledTbody.querySelectorAll(
+                'tr:not([class*="pagination-row"]):not(.no-result-message)'
+            ).length > 0;
+            if (hasJspData) {
+                loadedTabs.add(5);
+                initDynamicPagination('cancelledTableBody', 'cancelledPagination', 'cancelled-page', 5);
+            }
+        }
+        // const savedTab = typeof getSavedTab === 'function' ? getSavedTab() : 0;
     });
 })();

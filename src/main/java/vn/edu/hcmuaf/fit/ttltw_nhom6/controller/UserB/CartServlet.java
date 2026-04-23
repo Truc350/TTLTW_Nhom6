@@ -51,10 +51,6 @@ public class CartServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cart");
         }
     }
-
-    // ------------------------------------------------------------------ //
-    //  CLEAR CART                                                         //
-    // ------------------------------------------------------------------ //
     private void clearCart(HttpServletRequest request, HttpServletResponse response,
                            Cart cart, HttpSession session)
             throws ServletException, IOException {
@@ -62,17 +58,18 @@ public class CartServlet extends HttpServlet {
         User    currentUser = (User) session.getAttribute("currentUser");
         Integer userId      = (currentUser != null) ? currentUser.getId() : null;
 
-        // SỬA: dùng CartService để xóa cả DB lẫn session
-        cartService.clearCart(cart, userId, session.getId());
+        if (userId != null) {
+            // Đã đăng nhập → xóa DB
+            cartService.clearCart(cart, userId, null);
+        } else {
+            // Guest → xóa session
+            cart.removeAllItems();
+        }
 
         session.setAttribute("cart", cart);
-        session.setAttribute("successMsg", "Đã xóa toàn bộ giỏ hàng");
         response.sendRedirect(request.getContextPath() + "/cart");
     }
 
-    // ------------------------------------------------------------------ //
-    //  REMOVE ITEM                                                        //
-    // ------------------------------------------------------------------ //
     private void removeFromCart(HttpServletRequest request, HttpServletResponse response,
                                 Cart cart, HttpSession session)
             throws ServletException, IOException {
@@ -82,63 +79,55 @@ public class CartServlet extends HttpServlet {
             User    currentUser = (User) session.getAttribute("currentUser");
             Integer userId      = (currentUser != null) ? currentUser.getId() : null;
 
-            // SỬA: dùng CartService để xóa khỏi DB
-            cartService.removeItem(cart, userId, session.getId(), comicId);
+            if (userId != null) {
+                // Đã đăng nhập → xóa trong DB
+                cartService.removeItem(cart, userId, null, comicId);
+            } else {
+                // Guest → xóa trong session
+                cart.removeItem(comicId);
+            }
 
             session.setAttribute("cart", cart);
             session.setAttribute("successMsg", "Đã xóa sản phẩm khỏi giỏ hàng");
             response.sendRedirect(request.getContextPath() + "/cart");
 
         } catch (NumberFormatException e) {
-            e.printStackTrace();
             session.setAttribute("errorMsg", "Dữ liệu không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/cart");
         }
     }
 
-    // ------------------------------------------------------------------ //
-    //  UPDATE QUANTITY                                                    //
-    // ------------------------------------------------------------------ //
     private void updateCart(HttpServletRequest request, HttpServletResponse response,
                             Cart cart, HttpSession session)
             throws ServletException, IOException {
         try {
             int comicId  = Integer.parseInt(request.getParameter("comicId"));
             int quantity = Integer.parseInt(request.getParameter("quantity"));
-
-            if (quantity <= 0) {
-                session.setAttribute("errorMsg", "Số lượng phải lớn hơn 0");
-                response.sendRedirect(request.getContextPath() + "/cart");
-                return;
-            }
+            if (quantity <= 0) quantity = 1;
 
             User    currentUser = (User) session.getAttribute("currentUser");
             Integer userId      = (currentUser != null) ? currentUser.getId() : null;
 
-            // SỬA: dùng CartService (tự kiểm tra stock trong DB)
-            String result = cartService.updateCart(cart, userId, session.getId(), comicId, quantity);
-
-            if ("out_of_stock".equals(result)) {
-                session.setAttribute("errorMsg", "Sản phẩm không đủ hàng");
-            } else if ("not_found".equals(result)) {
-                session.setAttribute("errorMsg", "Không tìm thấy sản phẩm trong giỏ hàng");
+            if (userId != null) {
+                // Đã đăng nhập → update DB
+                String result = cartService.updateCart(cart, userId, null, comicId, quantity);
+                if ("out_of_stock".equals(result)) {
+                    session.setAttribute("errorMsg", "Sản phẩm không đủ hàng");
+                }
             } else {
-                session.setAttribute("successMsg", "Đã cập nhật số lượng");
+                // Guest → update session
+                cart.updateItem(comicId, quantity);
             }
 
             session.setAttribute("cart", cart);
             response.sendRedirect(request.getContextPath() + "/cart");
 
         } catch (NumberFormatException e) {
-            e.printStackTrace();
             session.setAttribute("errorMsg", "Dữ liệu không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/cart");
         }
     }
 
-    // ------------------------------------------------------------------ //
-    //  VIEW CART                                                          //
-    // ------------------------------------------------------------------ //
     private void viewCart(HttpServletRequest request, HttpServletResponse response, Cart cart)
             throws ServletException, IOException {
 
@@ -209,25 +198,124 @@ public class CartServlet extends HttpServlet {
 
         request.getRequestDispatcher("/frontend/nguoiB/cart.jsp").forward(request, response);
     }
-
-    // ------------------------------------------------------------------ //
-    //  ADD TO CART                                                        //
-    // ------------------------------------------------------------------ //
     private void addToCart(HttpServletRequest request, HttpServletResponse response,
                            Cart cart, HttpSession session)
             throws ServletException, IOException {
         try {
             int comicId  = Integer.parseInt(request.getParameter("comicId"));
             int quantity = Integer.parseInt(request.getParameter("quantity"));
+            if (quantity <= 0) quantity = 1;
 
             boolean isAjax    = "true".equals(request.getParameter("ajax"));
             String  returnUrl = request.getParameter("returnUrl");
 
-            if (quantity <= 0) quantity = 1;
-
             ComicService comicService = new ComicService();
             Comic        comic        = comicService.getComicById(comicId);
 
+<<<<<<< HEAD:src/main/java/vn/edu/hcmuaf/fit/ttltw_nhom6/controller/UserB/CartSevlet.java
+            if (comic == null) {
+                session.setAttribute("errorMsg", "Không tìm thấy sản phẩm");
+                if (isAjax) {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy sản phẩm\"}");
+                    return;
+                }
+                if ("wishlist".equals(returnUrl)) {
+                    response.sendRedirect(request.getContextPath() + "/wishlist");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                }
+                return;
+            }
+
+            User    currentUser = (User) session.getAttribute("currentUser");
+            Integer userId      = (currentUser != null) ? currentUser.getId() : null;
+            if (userId != null) {
+                CartItem existingItem  = cart.get(comicId);
+                int      totalQuantity = (existingItem != null)
+                        ? existingItem.getQuantity() + quantity : quantity;
+
+                if (comic.getStockQuantity() < totalQuantity) {
+                    session.setAttribute("errorMsg",
+                            "Sản phẩm không đủ hàng. Chỉ còn " + comic.getStockQuantity() + " sản phẩm.");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không đủ hàng\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
+
+                String result = cartService.addToCart(cart, userId, null, comicId, quantity);
+                session.setAttribute("cart", cart);
+
+                String successMsg = "Đã thêm \"" + comic.getNameComics() + "\" vào giỏ hàng!";
+                if ("out_of_stock".equals(result)) {
+                    session.setAttribute("errorMsg", "Sản phẩm không đủ hàng");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không đủ hàng\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
+                if ("not_found".equals(result)) {
+                    session.setAttribute("errorMsg", "Không tìm thấy sản phẩm");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy sản phẩm\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
+
+                session.setAttribute("successMsg", successMsg);
+            } else {
+                CartItem existingItem  = cart.get(comicId);
+                int      totalQuantity = (existingItem != null)
+                        ? existingItem.getQuantity() + quantity : quantity;
+
+                if (comic.getStockQuantity() < totalQuantity) {
+                    session.setAttribute("errorMsg",
+                            "Sản phẩm không đủ hàng. Chỉ còn " + comic.getStockQuantity() + " sản phẩm.");
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không đủ hàng\"}");
+                        return;
+                    }
+                    response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
+                    return;
+                }
+
+                // Lấy flash sale nếu có
+                FlashSaleComicsDAO  flashSaleComicsDAO = new FlashSaleComicsDAO();
+                Map<String, Object> flashSaleInfo      = flashSaleComicsDAO.getFlashSaleInfoByComicId(comicId);
+                Integer flashSaleId    = null;
+                Double  flashSalePrice = null;
+                if (flashSaleInfo != null) {
+                    flashSaleId = (Integer) flashSaleInfo.get("flashsale_id");
+                    Object discountObj = flashSaleInfo.get("discount_percent");
+                    Double discount    = (discountObj instanceof Number)
+                            ? ((Number) discountObj).doubleValue() : null;
+                    if (discount != null) {
+                        flashSalePrice = comic.getPrice() * (1 - discount / 100.0);
+                    }
+                }
+
+                // Lưu vào Cart object trong session
+                cart.addItem(comic, quantity, flashSaleId, flashSalePrice);
+                session.setAttribute("cart", cart);
+
+                String successMsg = "Đã thêm \"" + comic.getNameComics() + "\" vào giỏ hàng!";
+=======
             if (comic != null) {
 
                 // Lấy thông tin Flash Sale (để hiển thị message)
@@ -278,6 +366,7 @@ public class CartServlet extends HttpServlet {
 
                 // Xây dựng message
                 String successMsg = "Đã thêm \"" + comic.getNameComics() + "\" vào giỏ hàng!";
+>>>>>>> ca824ecbf44dc1d10871cb2602f4b3b20979309c:src/main/java/vn/edu/hcmuaf/fit/ttltw_nhom6/controller/UserB/CartServlet.java
                 if (flashSalePrice != null) {
                     successMsg += " (Giá Flash Sale: " + String.format("%,.0f", flashSalePrice) + "₫)";
                 } else if (comic.getDiscountPrice() < comic.getPrice()) {
@@ -291,49 +380,35 @@ public class CartServlet extends HttpServlet {
                     response.getWriter().write("{\"success\": true, \"message\": \"" + successMsg + "\"}");
                     return;
                 }
-
-                boolean buyNow = "true".equals(request.getParameter("buyNow"));
-                if (buyNow) {
-                    if (currentUser == null) {
-                        session.setAttribute("errorMsg", "Vui lòng đăng nhập để mua hàng");
-                        response.sendRedirect(request.getContextPath() + "/login");
-                        return;
-                    }
-
-                    CartItem addedItem = cart.get(comicId);
-                    if (addedItem != null) {
-                        List<CartItem> selectedItems = new ArrayList<>();
-                        selectedItems.add(addedItem);
-
-                        double subtotal    = addedItem.getFinalPrice() * addedItem.getQuantity();
-                        double shippingFee = 25000;
-                        double totalAmount = subtotal + shippingFee;
-
-                        session.setAttribute("selectedItems",    selectedItems);
-                        session.setAttribute("checkoutSubtotal", subtotal);
-                        session.setAttribute("shippingFee",      shippingFee);
-                        session.setAttribute("checkoutTotal",    totalAmount);
-
-                        response.sendRedirect(request.getContextPath() + "/checkout");
-                    }
-                } else {
-                    if ("wishlist".equals(returnUrl)) {
-                        response.sendRedirect(request.getContextPath() + "/wishlist");
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/comic-detail?id=" + comicId);
-                    }
-                }
-
-            } else {
-                session.setAttribute("errorMsg", "Không tìm thấy sản phẩm");
-
-                if (isAjax) {
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy sản phẩm\"}");
+            }
+            boolean buyNow = "true".equals(request.getParameter("buyNow"));
+            if (buyNow) {
+                if (currentUser == null) {
+                    session.setAttribute("errorMsg", "Vui lòng đăng nhập để mua hàng");
+                    response.sendRedirect(request.getContextPath() + "/login");
                     return;
                 }
+                CartItem addedItem = cart.get(comicId);
+                if (addedItem != null) {
+                    List<CartItem> selectedItems = new ArrayList<>();
+                    selectedItems.add(addedItem);
 
+                    double subtotal    = addedItem.getFinalPrice() * addedItem.getQuantity();
+                    double shippingFee = 25000;
+                    double totalAmount = subtotal + shippingFee;
+
+                    session.setAttribute("selectedItems",    selectedItems);
+                    session.setAttribute("checkoutSubtotal", subtotal);
+                    session.setAttribute("shippingFee",      shippingFee);
+                    session.setAttribute("checkoutTotal",    totalAmount);
+
+                    response.sendRedirect(request.getContextPath() + "/checkout");
+                }
+            } else {
+                if (isAjax) {
+                    // Đã được handle ở trên cho cả 2 case, không cần xử lý thêm
+                    return;
+                }
                 if ("wishlist".equals(returnUrl)) {
                     response.sendRedirect(request.getContextPath() + "/wishlist");
                 } else {

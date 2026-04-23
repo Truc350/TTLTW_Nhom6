@@ -556,6 +556,31 @@ public class CartDAO {
 
 
 
+    public int deleteGuestCartBySessionId(String sessionId) {
+        return jdbi.withHandle(handle -> {
+            Optional<Integer> cartIdOpt = handle
+                    .createQuery(
+                            "SELECT id FROM cart " +
+                                    "WHERE session_id = :sid " +
+                                    "  AND user_id IS NULL " +
+                                    "  AND status = 'active' LIMIT 1")
+                    .bind("sid", sessionId)
+                    .mapTo(Integer.class)
+                    .findOne();
+
+            if (cartIdOpt.isEmpty()) return 0;
+
+            int cartId = cartIdOpt.get();
+            handle.createUpdate(
+                            "DELETE FROM cart_item WHERE cart_id = :cartId")
+                    .bind("cartId", cartId)
+                    .execute();
+            return handle.createUpdate(
+                            "DELETE FROM cart WHERE id = :cartId")
+                    .bind("cartId", cartId)
+                    .execute();
+        });
+    }
 }
 
 

@@ -30,22 +30,47 @@ public class CartInitFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+//        HttpServletRequest httpRequest = (HttpServletRequest) request;
+//        String uri = httpRequest.getRequestURI();
+//        if (isStaticResource(uri)) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
+//        HttpSession session = httpRequest.getSession(false);
+//        if (session != null) {
+//            Cart cart = (Cart) session.getAttribute("cart");
+//            if (cart == null) {
+//                cart = new Cart();
+//                User    user      = (User) session.getAttribute("currentUser");
+//                Integer userId    = (user != null) ? user.getId() : null;
+//                String  sessionId = session.getId();
+//
+//                cartService.getCart(cart, userId, sessionId);
+//                session.setAttribute("cart", cart);
+//            }
+//        }
+//
+//        chain.doFilter(request, response);
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String uri = httpRequest.getRequestURI();
+
         if (isStaticResource(uri)) {
             chain.doFilter(request, response);
             return;
         }
+
         HttpSession session = httpRequest.getSession(false);
         if (session != null) {
             Cart cart = (Cart) session.getAttribute("cart");
+
             if (cart == null) {
                 cart = new Cart();
-                User    user      = (User) session.getAttribute("currentUser");
-                Integer userId    = (user != null) ? user.getId() : null;
-                String  sessionId = session.getId();
+                User    user   = (User) session.getAttribute("currentUser");
+                Integer userId = (user != null) ? user.getId() : null;
 
-                cartService.getCart(cart, userId, sessionId);
+                if (userId != null) {
+                    cartService.getCart(cart, userId, null);
+                }
                 session.setAttribute("cart", cart);
             }
         }

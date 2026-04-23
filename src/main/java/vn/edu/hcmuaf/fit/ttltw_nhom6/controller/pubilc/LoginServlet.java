@@ -56,42 +56,29 @@ public class LoginServlet extends HttpServlet {
             if (PasswordUtils.verifyPassword(password, user.getPasswordHash())) {
                 OrderViolationService.getInstance().resetLoginFailureCount(user.getId());
 
-                // BUOC 1: Lay guestSessionId TRUOC KHI invalidate session cu.
-                // Cart guest da duoc luu xuong DB boi CartSevlet,
-                // nen chi can sessionId de tra cuu trong DB, khong can cart object.
-                HttpSession oldSession     = request.getSession(false);
-                String      guestSessionId = null;
+                // BUOC 1: Lấy guest cart từ session CŨ trước khi invalidate
+                HttpSession oldSession  = request.getSession(false);
+                Cart        guestCart   = null;
                 if (oldSession != null) {
-                    guestSessionId = oldSession.getId();
+                    guestCart = (Cart) oldSession.getAttribute("cart");
                     oldSession.invalidate();
                 }
 
-                // BUOC 2: Tao session moi
+// BUOC 2: Tạo session mới
                 HttpSession newSession = request.getSession(true);
 
-                // Admin khong can cart
-                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    newSession.setAttribute("currentUser", user);
-                    newSession.setAttribute("userId",      user.getId());
-                    newSession.setAttribute("isAdmin",     true);
-                    setNoCacheHeaders(response);
-                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-                    return;
-                }
-
-                // BUOC 3: Merge guest cart (DB) vao user cart (DB)
-                // CartDAO.mergeCart doc guest cart theo guestSessionId,
-                // gop vao user cart, roi xoa guest cart.
+// BUOC 3: Merge guest cart (session) vào user cart (DB)
                 Cart userCart = new Cart();
-                if (guestSessionId != null) {
-                    cartService.mergeCart(userCart, user.getId(), guestSessionId);
+                if (guestCart != null && !guestCart.getItems().isEmpty()) {
+                    // Merge từng item của guest cart vào DB
+                    cartService.mergeSessionCartToDb(userCart, user.getId(), guestCart);
                 } else {
-                    cartService.getCart(userCart, user.getId(), newSession.getId());
+                    // Không có guest cart → load cart từ DB
+                    cartService.getCart(userCart, user.getId(), null);
                 }
 
-                newSession.setAttribute("cart",                  userCart);
-                newSession.setAttribute("currentUser",           user);
-                newSession.setAttribute("clearCartLocalStorage", true);
+                newSession.setAttribute("cart",        userCart);
+                newSession.setAttribute("currentUser", user);
 
                 setNoCacheHeaders(response);
                 String redirectUrl = (String) newSession.getAttribute("redirectAfterLogin");

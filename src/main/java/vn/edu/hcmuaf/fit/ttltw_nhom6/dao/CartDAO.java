@@ -362,6 +362,199 @@ public class CartDAO {
         );
     }
 
+    public int checkout(int cartId, int userId, int shippingAddressId,
+                        String recipientName, String shippingPhone,
+                        String shippingAddress, String shippingProvider,
+                        double shippingFee, int pointsUsed) throws Exception {
+
+        return jdbi.inTransaction(handle -> {
+
+            // 1.Load cart items
+            List<Map<String, Object>> items = handle.createQuery(
+                            "SELECT ci.quantity, ci.price_at_purchase, ci.flash_sale_price, ci.flash_sale_id, " +
+                                    "       c.id AS comic_id, c.name_comics " +
+                                    "FROM cart_item ci " +
+                                    "JOIN comics c ON ci.comic_id = c.id " +
+                                    "WHERE ci.cart_id = :cartId " +
+                                    "  AND c.status    = 'available' " +
+                                    "  AND c.is_hidden = 0 " +
+                                    "  AND c.is_deleted = 0")
+                    .bind("cartId", cartId)
+                    .mapToMap()
+                    .list();
+
+            if (items.isEmpty()) throw new Exception("Giỏ hàng trống!");
+
+            // 2. Lock đúng rows comics (FOR UPDATE riêng)
+            List<Integer> comicIds = items.stream()
+                    .map(i -> ((Number) i.get("comic_id")).intValue())
+                    .collect(java.util.stream.Collectors.toList());
+
+            String inClause = comicIds.stream()
+                    .map(String::valueOf)
+                    .collect(java.util.stream.Collectors.joining(","));
+
+            List<Map<String, Object>> lockedStocks = handle.createQuery(
+                            "SELECT id AS comic_id, " +
+                                    "       stock_quantity, " +
+                                    "       COALESCE(damaged_quantity, 0) AS damaged_quantity " +
+                                    "FROM comics " +
+                                    "WHERE id IN (" + inClause + ") " +
+                                    "FOR UPDATE")  // ← lock đúng rows comics
+                    .mapToMap()
+                    .list();
+
+            Map<Integer, Map<String, Object>> stockMap = new java.util.HashMap<>();
+            for (Map<String, Object> row : lockedStocks) {
+                stockMap.put(((Number) row.get("comic_id")).intValue(), row);
+            }
+
+            // 3. Kiểm tra flash sale còn hạn không
+            List<Integer> flashSaleIds = items.stream()
+                    .filter(i -> i.get("flash_sale_id") != null)
+                    .map(i -> ((Number) i.get("flash_sale_id")).intValue())
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+
+            java.util.Set<Integer> activeFlashSaleIds = new java.util.HashSet<>();
+            if (!flashSaleIds.isEmpty()) {
+                String fsInClause = flashSaleIds.stream()
+                        .map(String::valueOf)
+                        .collect(java.util.stream.Collectors.joining(","));
+
+                handle.createQuery(
+                                "SELECT id FROM flashsale " +
+                                        "WHERE id IN (" + fsInClause + ") " +
+                                        "  AND status = 'active' " +
+                                        "  AND NOW() BETWEEN start_time AND end_time " +
+                                        "  AND is_deleted = 0")
+                        .mapTo(Integer.class)
+                        .list()
+                        .forEach(activeFlashSaleIds::add);
+            }
+
+            // 4. Validate stock + trừ kho
+            for (Map<String, Object> item : items) {
+                int comicId = ((Number) item.get("comic_id")).intValue();
+                int qty     = ((Number) item.get("quantity")).intValue();
+                String name = (String) item.get("name_comics");
+
+                Map<String, Object> stock = stockMap.get(comicId);
+                if (stock == null) {
+                    throw new Exception("Không tìm thấy sản phẩm \"" + name + "\"!");
+                }
+
+                int stockQty   = ((Number) stock.get("stock_quantity")).intValue();
+                int damagedQty = ((Number) stock.get("damaged_quantity")).intValue();
+                int available  = stockQty - damagedQty;
+
+                if (available < qty) {
+                    throw new Exception("Sản phẩm \"" + name + "\" chỉ còn " + available + " cuốn!");
+                }
+
+                // Trừ kho — có điều kiện chống oversell (rowsAffected = 0 => hết hàng)
+                int rowsAffected = handle.createUpdate(
+                                "UPDATE comics " +
+                                        "SET stock_quantity = stock_quantity - :qty " +
+                                        "WHERE id = :comicId " +
+                                        "  AND (stock_quantity - COALESCE(damaged_quantity, 0)) >= :qty")
+                        .bind("qty",     qty)
+                        .bind("comicId", comicId)
+                        .execute();
+
+                // Double-check: nếu rowsAffected = 0 => có race condition xảy ra
+                if (rowsAffected == 0) {
+                    throw new Exception("Sản phẩm \"" + name + "\" vừa hết hàng, vui lòng thử lại!");
+                }
+            }
+// GỌI thêm INSERT INTO inventory_transaction Ở ĐÂY
+
+            // 5.  Tính tổng tiền
+            double subtotal = 0;
+            for (Map<String, Object> item : items) {
+                int qty = ((Number) item.get("quantity")).intValue();
+
+                // Chỉ dùng flash_sale_price nếu flash sale còn hạn
+                double unitPrice;
+                Integer flashSaleId = item.get("flash_sale_id") != null
+                        ? ((Number) item.get("flash_sale_id")).intValue() : null;
+
+                if (flashSaleId != null && activeFlashSaleIds.contains(flashSaleId)
+                        && item.get("flash_sale_price") != null) {
+                    unitPrice = ((Number) item.get("flash_sale_price")).doubleValue(); // giá sale
+                } else {
+                    unitPrice = ((Number) item.get("price_at_purchase")).doubleValue(); // giá gốc
+                }
+
+                subtotal += unitPrice * qty;
+            }
+            double totalAmount = subtotal + shippingFee;
+
+            // 6. Tạo order
+            int orderId = handle.createUpdate(
+                            "INSERT INTO orders " +
+                                    "  (user_id, status, total_amount, shipping_address_id, " +
+                                    "   recipient_name, shipping_phone, shipping_address, " +
+                                    "   shipping_provider, shipping_fee, points_used, order_date, created_at) " +
+                                    "VALUES " +
+                                    "  (:userId, 'pending', :totalAmount, :shippingAddressId, " +
+                                    "   :recipientName, :shippingPhone, :shippingAddress, " +
+                                    "   :shippingProvider, :shippingFee, :pointsUsed, NOW(), NOW())")
+                    .bind("userId",            userId)
+                    .bind("totalAmount",       totalAmount)
+                    .bind("shippingAddressId", shippingAddressId)
+                    .bind("recipientName",     recipientName)
+                    .bind("shippingPhone",     shippingPhone)
+                    .bind("shippingAddress",   shippingAddress)
+                    .bind("shippingProvider",  shippingProvider)
+                    .bind("shippingFee",       shippingFee)
+                    .bind("pointsUsed",        pointsUsed)
+                    .executeAndReturnGeneratedKeys("id")
+                    .mapTo(Integer.class)
+                    .one();
+
+            // 7. Tạo order_items
+            for (Map<String, Object> item : items) {
+                int comicId = ((Number) item.get("comic_id")).intValue();
+                int qty     = ((Number) item.get("quantity")).intValue();
+
+                Integer flashSaleId = item.get("flash_sale_id") != null
+                        ? ((Number) item.get("flash_sale_id")).intValue() : null;
+
+                double finalPrice;
+                if (flashSaleId != null && activeFlashSaleIds.contains(flashSaleId)
+                        && item.get("flash_sale_price") != null) {
+                    finalPrice = ((Number) item.get("flash_sale_price")).doubleValue();
+                } else {
+                    finalPrice = ((Number) item.get("price_at_purchase")).doubleValue();
+                    flashSaleId = null; // flash sale hết hạn → lưu null vào order_items
+                }
+
+                handle.createUpdate(
+                                "INSERT INTO order_items " +
+                                        "  (order_id, comic_id, quantity, price_at_purchase, flashsale_id) " +
+                                        "VALUES " +
+                                        "  (:orderId, :comicId, :qty, :price, :flashSaleId)")
+                        .bind("orderId",     orderId)
+                        .bind("comicId",     comicId)
+                        .bind("qty",         qty)
+                        .bind("price",       finalPrice)
+                        .bind("flashSaleId", flashSaleId)
+                        .execute();
+            }
+
+            // 8. Đánh dấu cart checked_out
+            handle.createUpdate(
+                            "UPDATE cart SET status = 'checked_out', updated_at = NOW() " +
+                                    "WHERE id = :cartId")
+                    .bind("cartId", cartId)
+                    .execute();
+
+            return orderId;
+        });
+    }
+
+
 
     public int deleteGuestCartBySessionId(String sessionId) {
         return jdbi.withHandle(handle -> {

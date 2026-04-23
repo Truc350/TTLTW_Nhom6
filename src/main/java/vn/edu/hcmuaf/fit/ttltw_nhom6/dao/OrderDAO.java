@@ -565,6 +565,10 @@ public class OrderDAO extends ADao {
 
             String oldStatus = order.getStatus();
 
+            if (!"Pending".equalsIgnoreCase(oldStatus)) {
+                return false;
+            }
+
             // 2. Cập nhật trạng thái đơn hàng
             int updated = handle.createUpdate("UPDATE orders SET status = ? WHERE id = ?")
                     .bind(0, "Cancelled")

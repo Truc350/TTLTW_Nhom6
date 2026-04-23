@@ -58,6 +58,9 @@ public class AdminOrderManagementServlet extends HttpServlet {
                     case "stats":
                         getStatistics(req, resp);
                         break;
+                    case "loadTab":
+                        loadTabData(req, resp);
+                        break;
                     default:
                         displayOrderManagement(req, resp);
                 }
@@ -65,6 +68,58 @@ public class AdminOrderManagementServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    private void loadTabData(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("Cache-Control", "no-cache");
+
+        String status = req.getParameter("status");
+
+        if (status == null || status.isEmpty()) {
+            resp.getWriter().write(gson.toJson(Map.of(
+                    "success", false,
+                    "message", "Missing status parameter"
+            )));
+            return;
+        }
+
+        try {
+            List<Map<String, Object>> orders;
+
+            switch (status) {
+                case "AwaitingPickup":
+                    orders = orderService.getOrdersWithDetailsByStatus("AwaitingPickup");
+                    break;
+                case "Shipping":
+                    orders = orderService.getOrdersWithDetailsByStatus("Shipping");
+                    break;
+                case "Completed":
+                    orders = orderService.searchCompletedOrders("");
+                    break;
+                case "Returned":
+                    orders = orderService.getAllReturnsWithDetails();
+                    break;
+                case "Cancelled":
+                    orders = orderService.getOrdersWithDetailsByStatus("Cancelled");
+                    break;
+                default:
+                    orders = new ArrayList<>();
+            }
+
+            resp.getWriter().write(gson.toJson(Map.of(
+                    "success", true,
+                    "orders", orders
+            )));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.getWriter().write(gson.toJson(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            )));
         }
     }
 

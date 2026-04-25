@@ -246,9 +246,9 @@
                         <p>Shop đóng gói cẩn thận, bọc nilon và seal đều rất chu đáo, còn bọc thêm chống sốc và bìa cứng
                             để truyện không bị hư hại gì. Nhất định sẽ mua lại ạ :3</p>
                         <div>
-                            <img src="../../img/review1.png" alt="review">
-                            <img src="../../img/review2.png" alt="review">
-                            <img src="../../img/review3.png" alt="review">
+                            <img src="${pageContext.request.contextPath}/img/review1.png" alt="review">
+                            <img src="${pageContext.request.contextPath}/img/review2.png" alt="review">
+                            <img src="${pageContext.request.contextPath}/img/review3.png" alt="review">
                         </div>
                     </div>
                     <div class="review-item">
@@ -261,7 +261,7 @@
                         <p class="review-date">08/11/2024</p>
                         <p>Shop giao hàng nhanh chóng gói hàng cũng kỹ lưỡng nha chu đáo nhắn tin với khách.</p>
                         <div>
-                            <img src="../../img/review4.png" alt="review">
+                            <img src="${pageContext.request.contextPath}/img/review4.png" alt="review">
                         </div>
                     </div>
                     <div class="review-item">
@@ -274,7 +274,7 @@
                         <p class="review-date">08/11/2024</p>
                         <p>Shop giao hàng nhanh chóng gói hàng cũng kỹ lưỡng nha chu đáo nhắn tin với khách.</p>
                         <div>
-                            <img src="../../img/review4.png" alt="review">
+                            <img src="${pageContext.request.contextPath}/img/review4.png" alt="review">
                         </div>
                     </div>
                 </div>

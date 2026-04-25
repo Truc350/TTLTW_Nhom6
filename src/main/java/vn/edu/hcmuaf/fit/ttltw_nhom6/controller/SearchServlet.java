@@ -19,7 +19,7 @@ import java.util.Set;
 public class SearchServlet extends HttpServlet {
     private ComicDAO comicDAO;
     private FlashSaleDAO flashSaleDAO;
-    private static final int ITEMS_PER_PAGE = 20;
+    private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     public void init() {
@@ -37,7 +37,7 @@ public class SearchServlet extends HttpServlet {
         flashSaleDAO.updateStatuses();
 
         String keyword = request.getParameter("keyword");
-        String searchType = request.getParameter("type");
+        String searchType = request.getParameter("searchType");
 
         int currentPage = 1;
         String pageParam = request.getParameter("page");

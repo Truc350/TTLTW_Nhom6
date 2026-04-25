@@ -29,6 +29,8 @@ public class Order {
     private int pointUsed;
     @ColumnName("created_at")
     private LocalDateTime createdAt;
+    @ColumnName("tracking_code")
+    private String trackingCode;
 
     public Order() {}
 
@@ -134,6 +136,14 @@ public class Order {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
     }
 
 

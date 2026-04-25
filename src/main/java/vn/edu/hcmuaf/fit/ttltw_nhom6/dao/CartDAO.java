@@ -6,9 +6,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class CartDAO {
     private final Jdbi jdbi;
@@ -385,26 +383,22 @@ public class CartDAO {
 
             if (items.isEmpty()) throw new Exception("Giỏ hàng trống!");
 
-            // 2. Lock đúng rows comics (FOR UPDATE riêng)
+            // 2. Lock đúng rows comics
             List<Integer> comicIds = items.stream()
                     .map(i -> ((Number) i.get("comic_id")).intValue())
-                    .collect(java.util.stream.Collectors.toList());
-
-            String inClause = comicIds.stream()
-                    .map(String::valueOf)
-                    .collect(java.util.stream.Collectors.joining(","));
+                    .distinct()
+                    .toList();
 
             List<Map<String, Object>> lockedStocks = handle.createQuery(
-                            "SELECT id AS comic_id, " +
-                                    "       stock_quantity, " +
-                                    "       COALESCE(damaged_quantity, 0) AS damaged_quantity " +
+                            "SELECT id AS comic_id, stock_quantity, COALESCE(damaged_quantity,0) AS damaged_quantity " +
                                     "FROM comics " +
-                                    "WHERE id IN (" + inClause + ") " +
-                                    "FOR UPDATE")  // ← lock đúng rows comics
+                                    "WHERE id IN (<ids>) " +
+                                    "FOR UPDATE")
+                    .bindList("ids", comicIds)
                     .mapToMap()
                     .list();
 
-            Map<Integer, Map<String, Object>> stockMap = new java.util.HashMap<>();
+            Map<Integer, Map<String, Object>> stockMap = new HashMap<>();
             for (Map<String, Object> row : lockedStocks) {
                 stockMap.put(((Number) row.get("comic_id")).intValue(), row);
             }
@@ -414,20 +408,17 @@ public class CartDAO {
                     .filter(i -> i.get("flash_sale_id") != null)
                     .map(i -> ((Number) i.get("flash_sale_id")).intValue())
                     .distinct()
-                    .collect(java.util.stream.Collectors.toList());
+                    .toList();
 
-            java.util.Set<Integer> activeFlashSaleIds = new java.util.HashSet<>();
+            Set<Integer> activeFlashSaleIds = new HashSet<>();
             if (!flashSaleIds.isEmpty()) {
-                String fsInClause = flashSaleIds.stream()
-                        .map(String::valueOf)
-                        .collect(java.util.stream.Collectors.joining(","));
-
                 handle.createQuery(
                                 "SELECT id FROM flashsale " +
-                                        "WHERE id IN (" + fsInClause + ") " +
-                                        "  AND status = 'active' " +
-                                        "  AND NOW() BETWEEN start_time AND end_time " +
-                                        "  AND is_deleted = 0")
+                                        "WHERE id IN (<ids>) " +
+                                        "AND status = 'active' " +
+                                        "AND NOW() BETWEEN start_time AND end_time " +
+                                        "AND is_deleted = 0")
+                        .bindList("ids", flashSaleIds)
                         .mapTo(Integer.class)
                         .list()
                         .forEach(activeFlashSaleIds::add);
@@ -452,29 +443,26 @@ public class CartDAO {
                     throw new Exception("Sản phẩm \"" + name + "\" chỉ còn " + available + " cuốn!");
                 }
 
-                // Trừ kho — có điều kiện chống oversell (rowsAffected = 0 => hết hàng)
                 int rowsAffected = handle.createUpdate(
                                 "UPDATE comics " +
                                         "SET stock_quantity = stock_quantity - :qty " +
                                         "WHERE id = :comicId " +
                                         "  AND (stock_quantity - COALESCE(damaged_quantity, 0)) >= :qty")
-                        .bind("qty",     qty)
+                        .bind("qty", qty)
                         .bind("comicId", comicId)
                         .execute();
 
-                // Double-check: nếu rowsAffected = 0 => có race condition xảy ra
                 if (rowsAffected == 0) {
                     throw new Exception("Sản phẩm \"" + name + "\" vừa hết hàng, vui lòng thử lại!");
                 }
-            }
 // GỌI thêm INSERT INTO inventory_transaction Ở ĐÂY
+            }
 
             // 5.  Tính tổng tiền
             double subtotal = 0;
             for (Map<String, Object> item : items) {
                 int qty = ((Number) item.get("quantity")).intValue();
 
-                // Chỉ dùng flash_sale_price nếu flash sale còn hạn
                 double unitPrice;
                 Integer flashSaleId = item.get("flash_sale_id") != null
                         ? ((Number) item.get("flash_sale_id")).intValue() : null;
@@ -490,25 +478,28 @@ public class CartDAO {
             }
             double totalAmount = subtotal + shippingFee;
 
+            String trackingCode = "TRACK" + System.currentTimeMillis();
+
             // 6. Tạo order
             int orderId = handle.createUpdate(
                             "INSERT INTO orders " +
                                     "  (user_id, status, total_amount, shipping_address_id, " +
                                     "   recipient_name, shipping_phone, shipping_address, " +
-                                    "   shipping_provider, shipping_fee, points_used, order_date, created_at) " +
+                                    "   shipping_provider, shipping_fee, points_used, tracking_code, order_date, created_at) " +
                                     "VALUES " +
                                     "  (:userId, 'pending', :totalAmount, :shippingAddressId, " +
                                     "   :recipientName, :shippingPhone, :shippingAddress, " +
-                                    "   :shippingProvider, :shippingFee, :pointsUsed, NOW(), NOW())")
-                    .bind("userId",            userId)
-                    .bind("totalAmount",       totalAmount)
+                                    "   :shippingProvider, :shippingFee, :pointsUsed, :tracking, NOW(), NOW())")
+                    .bind("userId", userId)
+                    .bind("totalAmount", totalAmount)
                     .bind("shippingAddressId", shippingAddressId)
-                    .bind("recipientName",     recipientName)
-                    .bind("shippingPhone",     shippingPhone)
-                    .bind("shippingAddress",   shippingAddress)
-                    .bind("shippingProvider",  shippingProvider)
-                    .bind("shippingFee",       shippingFee)
-                    .bind("pointsUsed",        pointsUsed)
+                    .bind("recipientName", recipientName)
+                    .bind("shippingPhone", shippingPhone)
+                    .bind("shippingAddress", shippingAddress)
+                    .bind("shippingProvider", shippingProvider)
+                    .bind("shippingFee", shippingFee)
+                    .bind("pointsUsed", pointsUsed)
+                    .bind("tracking", trackingCode)
                     .executeAndReturnGeneratedKeys("id")
                     .mapTo(Integer.class)
                     .one();
@@ -527,7 +518,7 @@ public class CartDAO {
                     finalPrice = ((Number) item.get("flash_sale_price")).doubleValue();
                 } else {
                     finalPrice = ((Number) item.get("price_at_purchase")).doubleValue();
-                    flashSaleId = null; // flash sale hết hạn → lưu null vào order_items
+                    flashSaleId = null;
                 }
 
                 handle.createUpdate(
@@ -535,10 +526,10 @@ public class CartDAO {
                                         "  (order_id, comic_id, quantity, price_at_purchase, flashsale_id) " +
                                         "VALUES " +
                                         "  (:orderId, :comicId, :qty, :price, :flashSaleId)")
-                        .bind("orderId",     orderId)
-                        .bind("comicId",     comicId)
-                        .bind("qty",         qty)
-                        .bind("price",       finalPrice)
+                        .bind("orderId", orderId)
+                        .bind("comicId", comicId)
+                        .bind("qty", qty)
+                        .bind("price", finalPrice)
                         .bind("flashSaleId", flashSaleId)
                         .execute();
             }

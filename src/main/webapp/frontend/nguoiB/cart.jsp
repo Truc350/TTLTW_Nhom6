@@ -145,40 +145,72 @@
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="item" items="${cartItems}">
-                            <div class="cart-item" data-comic-id="${item.comic.id}">
+                            <%--                            tinh available = stock - damaged --%>
+                            <c:set var="available" value="${item.comic.stockQuantity - item.comic.damagedQuantity}"/>
+                            <c:set var="outOfStock" value="${available <= 0}"/>
+
+                            <div class="cart-item ${outOfStock ? 'out-of-stock-item' : ''}"
+                                 data-comic-id="${item.comic.id}"
+                                 data-available="${available}">
+
                                 <input type="checkbox" class="item-checkbox" name="selectedComics"
                                        value="${item.comic.id}"
-                                       form="checkoutForm"/>
+                                       form="checkoutForm"
+                                    ${outOfStock ? 'disabled' : ''}/>
+
                                 <img src="${item.comic.thumbnailUrl}"
-                                     alt="${item.comic.nameComics}" class="item-image"/>
+                                     alt="${item.comic.nameComics}"
+                                     class="item-image ${outOfStock ? 'img-faded' : ''}"/>
+
                                 <div class="item-info">
-                                    <div class="item-title">${item.comic.nameComics}</div>
+                                    <div class="item-title ${outOfStock ? 'title-faded' : ''}">${item.comic.nameComics}</div>
                                     <div class="item-subtitle">${item.comic.nameComics}</div>
-                                    <div class="item-price" data-price="${item.finalPrice}">
-                                        <span class="discount-price">
-                                            <fmt:formatNumber value="${item.finalPrice}" type="number"
-                                                              groupingUsed="true"/> đ
-                                        </span>
-                                        <c:if test="${item.flashSaleId != null}">
-                                            <span class="flash-sale-badge">⚡ Flash Sale</span>
-                                        </c:if>
-                                        <c:if test="${item.finalPrice < item.comic.price}">
-                                            <del class="original-price">
-                                                <fmt:formatNumber value="${item.comic.price}" type="number"
-                                                                  groupingUsed="true"/> đ
-                                            </del>
-                                        </c:if>
-                                    </div>
+
+                                    <c:choose>
+                                        <c:when test="${outOfStock}">
+                                            <div class="out-of-stock-notice">
+                                                <i class="fa-solid fa-circle-exclamation"></i>
+                                                <a href="${pageContext.request.contextPath}/">
+                                                Sản phẩm đã hết hàng, vui lòng chọn truyện khác</a>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="item-price" data-price="${item.finalPrice}">
+                        <span class="discount-price">
+                            <fmt:formatNumber value="${item.finalPrice}" type="number"
+                                              groupingUsed="true"/> đ
+                        </span>
+                                                <c:if test="${item.flashSaleId != null}">
+                                                    <span class="flash-sale-badge">⚡ Flash Sale</span>
+                                                </c:if>
+                                                <c:if test="${item.finalPrice < item.comic.price}">
+                                                    <del class="original-price">
+                                                        <fmt:formatNumber value="${item.comic.price}" type="number"
+                                                                          groupingUsed="true"/> đ
+                                                    </del>
+                                                </c:if>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
+
                                 <div class="quantity-control">
-                                    <button type="button" class="quantity-btn minus">-</button>
+                                    <button type="button" class="quantity-btn minus" ${outOfStock ? 'disabled' : ''}>-</button>
                                     <input type="text" value="${item.quantity}" class="quantity-input" readonly/>
-                                    <button type="button" class="quantity-btn plus">+</button>
+                                    <button type="button" class="quantity-btn plus" ${outOfStock ? 'disabled' : ''}>+</button>
                                 </div>
+
                                 <div class="item-footer">
-                                    <div class="item-total">
-                                        <fmt:formatNumber value="${item.subtotal}" type="number" groupingUsed="true"/> đ
-                                    </div>
+                                    <c:choose>
+                                        <c:when test="${outOfStock}">
+                                            <div class="item-total" style="color: #999;"></div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="item-total">
+                                                <fmt:formatNumber value="${item.subtotal}" type="number" groupingUsed="true"/> đ
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                     <button type="button" class="delete-btn">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>

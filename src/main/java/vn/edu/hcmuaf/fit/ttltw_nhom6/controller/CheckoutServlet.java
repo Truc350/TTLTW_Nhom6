@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.jdbi.v3.core.Jdbi;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CartDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserShippingAddressDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
@@ -25,11 +26,13 @@ import java.util.Optional;
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
     private UserShippingAddressDAO shippingAddressDAO;
+    private CartDAO cartDAO;
 
     @Override
     public void init() throws ServletException {
         Jdbi jdbi = JdbiConnector.get();
         shippingAddressDAO = new UserShippingAddressDAO(jdbi);
+        cartDAO = new CartDAO();
     }
 
     @Override
@@ -72,6 +75,9 @@ public class CheckoutServlet extends HttpServlet {
                     }
                 }
 
+                int cartId = cartDAO.getOrCreateCartByUserId(user.getId());
+                cartDAO.addItem(cartId, comicId, quantity);
+
                 CartItem tempItem = new CartItem(comic, quantity, flashSaleId, flashSalePrice);
                 double subtotal = tempItem.getFinalPrice() * quantity;
 
@@ -98,7 +104,20 @@ public class CheckoutServlet extends HttpServlet {
             }
         }
 
-        request.setAttribute("user", user);
+        Boolean justOrdered = (Boolean) session.getAttribute("justOrdered");
+        if (justOrdered != null && justOrdered) {
+            session.removeAttribute("justOrdered");
+
+            String orderSuccess = (String) session.getAttribute("orderSuccess");
+            if (orderSuccess != null) {
+                request.setAttribute("orderSuccess", orderSuccess);
+                session.removeAttribute("orderSuccess");
+            }
+
+            request.setAttribute("user", user);
+            request.getRequestDispatcher("/frontend/nguoiB/checkout.jsp").forward(request, response);
+            return;
+        }
 
         @SuppressWarnings("unchecked")
         List<CartItem> selectedItems = (List<CartItem>) session.getAttribute("selectedItems");
@@ -109,19 +128,45 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        Optional<UserShippingAddress> defaultAddress =
-                shippingAddressDAO.getDefaultAddress(user.getId());
+        FlashSaleComicsDAO flashSaleDAOCheck = new FlashSaleComicsDAO();
+        boolean priceUpdated = false;
+
+        for (CartItem item : selectedItems) {
+            if (item.getFlashSaleId() != null) {
+                Map<String, Object> flashInfo = flashSaleDAOCheck
+                        .getFlashSaleInfoByComicId(item.getComic().getId());
+
+                if (flashInfo == null) {
+                    item.removeFlashSale();
+                    priceUpdated = true;
+                }
+            }
+        }
+
+        if (priceUpdated) {
+            double newSubtotal = selectedItems.stream()
+                    .mapToDouble(i -> i.getFinalPrice() * i.getQuantity())
+                    .sum();
+            double shippingFee = session.getAttribute("shippingFee") != null
+                    ? ((Number) session.getAttribute("shippingFee")).doubleValue()
+                    : 25000;
+
+            session.setAttribute("selectedItems",    selectedItems);
+            session.setAttribute("checkoutSubtotal", newSubtotal);
+            session.setAttribute("checkoutTotal",    newSubtotal + shippingFee);
+        }
+
+        Optional<UserShippingAddress> defaultAddress = shippingAddressDAO.getDefaultAddress(user.getId());
 
         if (defaultAddress.isPresent()) {
             UserShippingAddress address = defaultAddress.get();
 
             if (address.getDistrict() == null || address.getDistrict().trim().isEmpty()) {
                 List<UserShippingAddress> allAddresses = shippingAddressDAO.getAddressesByUserId(user.getId());
-                UserShippingAddress addressWithDistrict = allAddresses.stream()
+                address = allAddresses.stream()
                         .filter(a -> a.getDistrict() != null && !a.getDistrict().trim().isEmpty())
                         .findFirst()
                         .orElse(address);
-                address = addressWithDistrict;
             }
             request.setAttribute("defaultAddress", address);
             request.setAttribute("defaultRecipientName", address.getRecipientName());
@@ -132,17 +177,12 @@ public class CheckoutServlet extends HttpServlet {
             request.setAttribute("defaultStreetAddress", address.getStreetAddress());
         }
 
-        String orderSuccess = (String) session.getAttribute("orderSuccess");
-        if (orderSuccess != null) {
-            request.setAttribute("orderSuccess", orderSuccess);
-            session.removeAttribute("orderSuccess");
-        }
         String orderError = (String) session.getAttribute("orderError");
         if (orderError != null) {
             request.setAttribute("orderError", orderError);
             session.removeAttribute("orderError");
         }
-
+        request.setAttribute("user", user);
         request.getRequestDispatcher("/frontend/nguoiB/checkout.jsp").forward(request, response);
     }
 
@@ -157,6 +197,75 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
+        String action = request.getParameter("action");
+
+        if ("place".equals(action)) {
+            @SuppressWarnings("unchecked")
+            List<CartItem> selectedItems = (List<CartItem>) session.getAttribute("selectedItems");
+
+            if (selectedItems == null || selectedItems.isEmpty()) {
+                session.setAttribute("orderError", "Không có sản phẩm nào để đặt hàng");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+
+            String recipientName  = request.getParameter("recipientName");
+            String shippingPhone  = request.getParameter("shippingPhone");
+            String shippingAddress = request.getParameter("shippingAddress");
+            String shippingProvider = request.getParameter("shippingProvider");
+            String addressIdParam = request.getParameter("shippingAddressId");
+            String pointsParam    = request.getParameter("pointsUsed");
+            String feeParam       = request.getParameter("shippingFee");
+
+            if (recipientName == null || recipientName.trim().isEmpty()
+                    || shippingPhone == null || shippingPhone.trim().isEmpty()
+                    || shippingAddress == null || shippingAddress.trim().isEmpty()) {
+                session.setAttribute("orderError", "Vui lòng điền đầy đủ thông tin giao hàng");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+
+            int shippingAddressId = (addressIdParam != null && !addressIdParam.isEmpty())
+                    ? Integer.parseInt(addressIdParam) : 0;
+            int pointsUsed = (pointsParam != null && !pointsParam.isEmpty())
+                    ? Integer.parseInt(pointsParam) : 0;
+            double shippingFee = (feeParam != null && !feeParam.isEmpty())
+                    ? Double.parseDouble(feeParam) : 25000;
+
+            int cartId = cartDAO.getOrCreateCartByUserId(user.getId());
+
+            try {
+                int orderId = cartDAO.checkout(
+                        cartId,
+                        user.getId(),
+                        shippingAddressId,
+                        recipientName.trim(),
+                        shippingPhone.trim(),
+                        shippingAddress.trim(),
+                        shippingProvider != null ? shippingProvider : "standard",
+                        shippingFee,
+                        pointsUsed
+                );
+
+                session.removeAttribute("selectedItems");
+                session.removeAttribute("cartItems");
+                session.removeAttribute("checkoutSubtotal");
+                session.removeAttribute("checkoutTotal");
+                session.removeAttribute("shippingFee");
+
+                session.setAttribute("justOrdered",  true);
+                session.setAttribute("orderSuccess",
+                        "Đặt hàng thành công! Mã đơn hàng: #" + orderId);
+                response.sendRedirect(request.getContextPath() + "/checkout");
+
+            } catch (Exception e) {
+                session.setAttribute("orderError", e.getMessage());
+                response.sendRedirect(request.getContextPath() + "/checkout");
+            }
+            return;
+        }
+
+
         String[] selectedComicIds = request.getParameterValues("selectedComics");
 
         if (selectedComicIds == null || selectedComicIds.length == 0) {
@@ -165,11 +274,10 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        @SuppressWarnings("unchecked")
-        List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
+        int cartId = cartDAO.getOrCreateCartByUserId(user.getId());
+        List<CartItem> cartItems = cartDAO.getCartItems(cartId);
 
         if (cartItems == null || cartItems.isEmpty()) {
-            System.out.println("Cart is empty!");
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
@@ -188,8 +296,13 @@ public class CheckoutServlet extends HttpServlet {
             }
         }
 
-        double shippingFee = 25000;
+        if (selectedItems.isEmpty()) {
+            session.setAttribute("checkoutError", "Không tìm thấy sản phẩm đã chọn");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
 
+        double shippingFee = 25000;
         double totalAmount = subtotal + shippingFee;
 
         session.setAttribute("selectedItems", selectedItems);

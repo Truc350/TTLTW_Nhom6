@@ -7,16 +7,28 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class VNPayUtils {
-    public static final String VNP_TMN_CODE = "PRKE87PB";
-    public static final String VNP_HASH_SECRET = "4X9G4D9M04WW2I7WICWIZ7DZS4V1G3MF";
+    public static  String VNP_TMN_CODE ;
+    public static  String VNP_HASH_SECRET ;
     public static final String VNP_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static final String VNP_VERSION = "2.1.0";
     public static final String VNP_COMMAND = "pay";
     public static final String VNP_CURRENCY = "VND";
     public static final String VNP_LOCALE = "vn";
+
+    static {
+        try {
+            Properties prop = new Properties();
+            prop.load(VNPayUtils.class.getClassLoader().getResourceAsStream("vnpay.properties"));
+            VNP_TMN_CODE = prop.getProperty("vnp_TmnCode");
+            VNP_HASH_SECRET = prop.getProperty("vnp_HashSecret");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static String createPaymentUrl(int orderId, long amount, String orderInfo, String returnUrl, String ipAddress) {
         // tao ma giao dich duy nhat
@@ -107,17 +119,29 @@ public class VNPayUtils {
         String[] values = params.get(key);
         return (values != null && values.length > 0) ? values[0] : null;
     }
-    private static String hmacSHA512(String key, String data) {
+    public static String hmacSHA512(String key, String data) {
+
         try {
+
             Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
-            byte[] bytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) sb.append(String.format("%02x", b));
-            return sb.toString();
+
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "HmacSHA512");
+            mac.init(secretKey);
+
+            byte[] hash = mac.doFinal(data.getBytes());
+
+            StringBuilder hex = new StringBuilder();
+
+            for (byte b : hash) {
+                hex.append(String.format("%02x", b));
+            }
+
+            return hex.toString();
+
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi HMAC-SHA512: " + e.getMessage(), e);
+            return "";
         }
+
     }
 
 }

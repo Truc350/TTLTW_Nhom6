@@ -10,6 +10,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.ComicImage;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Review;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.cache.CacheService;
 
 import java.util.List;
 
@@ -61,7 +62,20 @@ public class ComicService {
 
 
     public Comic getComicById(int comicId) {
-        return comicDAO.getComicById(comicId);
+        // 1. check cache
+        if (CacheService.comicCache.containsKey(comicId)) {
+            return CacheService.comicCache.get(comicId);
+        }
+
+        // 2. load DB
+        Comic comic = comicDAO.getComicById(comicId);
+
+        // 3. lưu cache
+        if (comic != null) {
+            CacheService.comicCache.put(comicId, comic);
+        }
+
+        return comic;
     }
 
     public String getSeriesName(Integer seriesId) {

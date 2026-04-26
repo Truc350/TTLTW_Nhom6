@@ -66,14 +66,20 @@ public class LoginServlet extends HttpServlet {
 
 // BUOC 2: Tạo session mới
                 HttpSession newSession = request.getSession(true);
+                if("admin".equalsIgnoreCase(user.getRole())){
+                    newSession.setAttribute("currentUser", user);
+                    newSession.setAttribute("userId", user.getId());
+                    newSession.setAttribute("isAdmin", true);
+                    setNoCacheHeaders(response);
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                    return;
+                }
 
 // BUOC 3: Merge guest cart (session) vào user cart (DB)
                 Cart userCart = new Cart();
                 if (guestCart != null && !guestCart.getItems().isEmpty()) {
-                    // Merge từng item của guest cart vào DB
                     cartService.mergeSessionCartToDb(userCart, user.getId(), guestCart);
                 } else {
-                    // Không có guest cart → load cart từ DB
                     cartService.getCart(userCart, user.getId(), null);
                 }
 
@@ -114,7 +120,7 @@ public class LoginServlet extends HttpServlet {
 
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma",        "no-cache");
-        response.setDateHeader("Expires",   0);
+        response.setHeader("Pragma","no-cache");
+        response.setDateHeader("Expires",0);
     }
 }

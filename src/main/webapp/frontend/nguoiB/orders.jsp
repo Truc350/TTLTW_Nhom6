@@ -158,6 +158,15 @@
                     <fmt:formatNumber value="${order.totalAmount}" pattern="#,##0"/> đ
                 </strong></span>
                     </div>
+
+                    <div class="order-footer">
+                        <c:if test="${order.status == 'Shipping' && not empty order.trackingCode}">
+                            <div class="tracking-info">
+                                <span>Mã vận đơn:</span>
+                                <strong>${order.trackingCode}</strong>
+                            </div>
+                        </c:if>
+                    </div>
                     <div class="order-actions">
                         <c:choose>
                             <c:when test="${order.status == 'Completed'}">

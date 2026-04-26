@@ -478,7 +478,7 @@ public class CartDAO {
             }
             double totalAmount = subtotal + shippingFee;
 
-            String trackingCode = "TRACK" + System.currentTimeMillis();
+            String trackingCode = generateTrackingCode(shippingProvider);
 
             // 6. Tạo order
             int orderId = handle.createUpdate(
@@ -571,6 +571,21 @@ public class CartDAO {
                     .bind("cartId", cartId)
                     .execute();
         });
+    }
+
+    private String generateTrackingCode(String shippingProvider) {
+        String prefix;
+        if ("express".equalsIgnoreCase(shippingProvider)) {
+            prefix = "EXP";
+        } else {
+            prefix = "STD";
+        }
+        // Format: STD-20240426-A1B2C3
+        String datePart = java.time.LocalDate.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String randomPart = java.util.UUID.randomUUID()
+                .toString().substring(0, 6).toUpperCase();
+        return prefix + "-" + datePart + "-" + randomPart;
     }
 }
 

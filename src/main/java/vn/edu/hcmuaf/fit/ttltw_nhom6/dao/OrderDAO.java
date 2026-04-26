@@ -50,8 +50,8 @@ public class OrderDAO extends ADao {
             String insertOrderSql = "INSERT INTO orders " +
                     "(user_id, order_date, status, total_amount, shipping_address_id, " +
                     "recipient_name, shipping_phone, shipping_address, shipping_provider, " +
-                    "shipping_fee, points_used, created_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "shipping_fee, points_used, tracking_code, created_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             int orderId = handle.createUpdate(insertOrderSql)
                     .bind(0, order.getUserId())
@@ -65,7 +65,8 @@ public class OrderDAO extends ADao {
                     .bind(8, order.getShippingProvider())
                     .bind(9, order.getShippingFee())
                     .bind(10, order.getPointUsed())
-                    .bind(11, order.getCreatedAt())
+                    .bind(11, order.getTrackingCode())
+                    .bind(12, order.getCreatedAt())
                     .executeAndReturnGeneratedKeys("id")
                     .mapTo(Integer.class)
                     .one();

@@ -310,6 +310,8 @@ public class OrderServlet extends HttpServlet {
             order.setShippingAddressId(shippingAddressId);
             order.setRecipientName(recipientName.trim());
             order.setShippingPhone(shippingPhone.trim());
+            String trackingCode = generateTrackingCode(shippingMethod);
+            order.setTrackingCode(trackingCode);
 
             String fullAddress = streetAddress.trim() + ", " + ward.trim();
             if (district != null && !district.trim().isEmpty()) {
@@ -338,6 +340,11 @@ public class OrderServlet extends HttpServlet {
             int orderId = orderDAO.createOrderWithPayment(order, orderItems, paymentMethod);
 
             if (orderId > 0) {
+                CartDAO cartDAOClean = new CartDAO();
+                int userCartId = cartDAOClean.getOrCreateCartByUserId(user.getId());
+                for (CartItem item : selectedItems) {
+                    cartDAOClean.removeItem(userCartId, item.getComic().getId());
+                }
                 if ("ewallet".equals(paymentMethod)) {
                     PaymentDAO paymentDAO = new PaymentDAO(JdbiConnector.get());
 
@@ -435,5 +442,14 @@ public class OrderServlet extends HttpServlet {
             randomPart.append(characters.charAt(random.nextInt(characters.length())));
         }
         return prefix + timestamp + randomPart.toString();
+    }
+
+    private String generateTrackingCode(String shippingProvider) {
+        String prefix = "express".equalsIgnoreCase(shippingProvider) ? "EXP" : "STD";
+        String datePart = java.time.LocalDate.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String randomPart = java.util.UUID.randomUUID()
+                .toString().substring(0, 6).toUpperCase();
+        return prefix + "-" + datePart + "-" + randomPart;
     }
 }

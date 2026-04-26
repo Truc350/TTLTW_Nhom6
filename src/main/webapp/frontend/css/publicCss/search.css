@@ -115,3 +115,67 @@ body {
 .sold strong {
     color: #ff5722;
 }
+
+
+.comic-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 32px 0 16px;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1.5px solid #f87171;
+    border-radius: 8px;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pagination a:hover {
+    border-color: #f28b82;
+    color: #e53935;
+}
+
+.pagination .active {
+    background: #f28b82;
+    border-color: #f28b82;
+    color: #fff;
+    pointer-events: none;
+}
+
+.pagination .disabled {
+    color: #ccc;
+    border-color: #eee;
+    pointer-events: none;
+    cursor: default;
+}
+
+.pagination .page-arrow {
+    font-size: 16px;
+}
+.search-info {
+    text-align: center;
+    margin: 12px 0 20px;
+}
+
+.search-info strong {
+    color: #e53935;
+}

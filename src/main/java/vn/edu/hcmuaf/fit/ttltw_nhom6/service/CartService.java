@@ -4,6 +4,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CartDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Cart;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.cache.CacheService;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,19 @@ private final CartDAO cartDAO;
 
         int cartId = cartIdOpt.get();
         cart.setId(cartId);
+        if (CacheService.cartCache.containsKey(cartId)) {
+            System.out.println("LOAD CART FROM CACHE");
+            List<CartItem> items = CacheService.cartCache.get(cartId);
+            cart.setItems(items);
+            return items;
+        }
+
         List<CartItem> items = cartDAO.getCartItems(cartId);
+
+        if (items != null) {
+            CacheService.cartCache.put(cartId, items);
+        }
+
         cart.setItems(items);
         return items;
     }
@@ -38,7 +51,7 @@ private final CartDAO cartDAO;
         System.out.println("[CartService] addItem returned: " + affected);
         if (affected < 0) return "not_found";
         if (affected == 0) return "out_of_stock";
-
+        CacheService.cartCache.remove(cartId);
         refreshCart(cart, cartId);
         return "success";
     }
@@ -49,6 +62,8 @@ private final CartDAO cartDAO;
         if (cartIdOpt.isEmpty()) return "not_found";
 
         int cartId = cartIdOpt.get();
+
+        CacheService.cartCache.remove(cartId);
 
         CartItem existing = cart.get(comicId);
         if (existing == null) return "not_found";
@@ -75,6 +90,7 @@ private final CartDAO cartDAO;
         if (cartIdOpt.isEmpty()) return false;
 
         int cartId   = cartIdOpt.get();
+        CacheService.cartCache.remove(cartId);
         int affected = cartDAO.removeItem(cartId, comicId);
         if (affected > 0) {
             refreshCart(cart, cartId);
@@ -86,7 +102,7 @@ private final CartDAO cartDAO;
     public void clearCart(Cart cart, Integer userId, String sessionId) {
         Optional<Integer> cartIdOpt = resolveCartId(userId, sessionId, false);
         if (cartIdOpt.isEmpty()) return;
-
+        CacheService.cartCache.remove(cartIdOpt.get());
         cartDAO.clearCartItems(cartIdOpt.get());
         cart.removeAllItems();
     }
@@ -120,6 +136,7 @@ private final CartDAO cartDAO;
         List<CartItem> items = cartDAO.getCartItems(cartId);
         System.out.println("[CartService] refreshCart: cartId=" + cartId
                 + " items loaded=" + items.size());
+        CacheService.cartCache.put(cartId, items);
         cart.setItems(items);
     }
 

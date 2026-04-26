@@ -1983,3 +1983,53 @@ main {
 .star {
     color: red !important;
 }
+
+.order-footer {
+    padding: 12px 16px;
+    border-top: 1px dashed #eee;
+    background: #fafafa;
+    border-radius: 0 0 8px 8px;
+}
+
+.tracking-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #fff3e0;
+    border-radius: 6px;
+    border-left: 3px solid #ff9800;
+    font-size: 14px;
+}
+
+.tracking-info i {
+    color: #ff9800;
+}
+
+.tracking-info strong {
+    color: #e65100;
+    letter-spacing: 1px;
+    font-family: monospace;
+    font-size: 15px;
+}
+
+.shipping-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+}
+
+.shipping-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
+}
+
+.shipping-row i {
+    color: #999;
+    width: 14px;
+    text-align: center;
+}

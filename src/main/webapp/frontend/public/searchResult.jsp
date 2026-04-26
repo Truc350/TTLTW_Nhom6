@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/frontend/css/publicCss/nav.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/frontend/css/publicCss/FooterStyle.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/frontend/css/publicCss/homePage.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/frontend/css/publicCss/pagination.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -88,6 +87,37 @@
                 </c:forEach>
             </div>
             <c:if test="${totalPages > 1}">
+                <div class="pagination">
+                    <c:choose>
+                        <c:when test="${currentPage <= 1}">
+                            <span class="disabled page-arrow">&#8249;</span>
+                        </c:when>
+                        <c:otherwise>
+                            <a class="page-arrow" href="?keyword=${keyword}&searchType=${searchType}&page=${currentPage - 1}">&#8249;</a>
+                        </c:otherwise>
+                    </c:choose>
+
+                        <%-- Các số trang --%>
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <c:choose>
+                            <c:when test="${i == currentPage}">
+                                <span class="active">${i}</span>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="?keyword=${keyword}&searchType=${searchType}&page=${i}">${i}</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+
+                    <c:choose>
+                        <c:when test="${currentPage >= totalPages}">
+                            <span class="disabled page-arrow">&#8250;</span>
+                        </c:when>
+                        <c:otherwise>
+                            <a class="page-arrow" href="?keyword=${keyword}&searchType=${searchType}&page=${currentPage + 1}">&#8250;</a>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </c:if>
 
         </c:otherwise>

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CartDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.ComicDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.OrderDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.*;
@@ -45,6 +46,9 @@ public class BuyAgainServlet extends HttpServlet {
 
             OrderDAO orderDAO = new OrderDAO();
             ComicDAO comicDAO = new ComicDAO();
+            CartDAO cartDAO = new CartDAO();
+
+            int userCartId = cartDAO.getOrCreateCartByUserId(currentUser.getId());
 
             List<OrderItem> orderItems = orderDAO.getOrderItems(orderId);
 
@@ -64,7 +68,8 @@ public class BuyAgainServlet extends HttpServlet {
                 int requestedQty = item.getQuantity();
                 int totalQty = currentQtyInCart + requestedQty;
 
-                if (comic.getStockQuantity() < totalQty) {
+                int available = comic.getStockQuantity() - comic.getDamagedQuantity();
+                if (available < totalQty) {
                     outOfStockCount++;
                     errorMsg.append(comic.getNameComics())
                             .append(" (chỉ còn ")
@@ -73,14 +78,18 @@ public class BuyAgainServlet extends HttpServlet {
                     continue;
                 }
 
-                cart.addItem(comic, requestedQty);
-                addedCount++;
+                int result = cartDAO.addItem(userCartId, comic.getId(), requestedQty);
+                if (result > 0) {
+                    cart.addItem(comic, requestedQty);
+                    addedCount++;
+                } else {
+                    outOfStockCount++;
+                    errorMsg.append(comic.getNameComics()).append(", ");
+                }
             }
 
-            // Lưu lại giỏ hàng
             session.setAttribute("cart", cart);
 
-            // Tạo response
             Map<String, Object> result = new HashMap<>();
 
             if (addedCount > 0) {

@@ -18,11 +18,11 @@ import java.util.Map;
 
 @WebServlet("/cart")
 public class CartServlet extends HttpServlet {
-    private CartService cartService;  // THÊM MỚI
+    private CartService cartService;
 
     @Override
     public void init() {
-        cartService = new CartService();  // THÊM MỚI
+        cartService = new CartService();
     }
 
     @Override
@@ -139,6 +139,10 @@ public class CartServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User    currentUser = (User) session.getAttribute("currentUser");
         Integer userId      = (currentUser != null) ? currentUser.getId() : null;
+        if (userId != null) {
+            cartService.getCart(cart, userId, null);
+            session.setAttribute("cart", cart);
+        }
         CartService cartService = new CartService();
         cartService.getCart(cart, userId, session.getId());
         session.setAttribute("cart", cart);

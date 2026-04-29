@@ -26,29 +26,9 @@ public class CartDAO {
             if (cartId.isPresent()) return cartId.get();
 
             return handle.createUpdate(
-                            "INSERT INTO cart (user_id, session_id, status, created_at, updated_at) " +
-                                    "VALUES (:uid, NULL, 'active', NOW(), NOW())")
+                            "INSERT INTO cart (user_id, status, created_at, updated_at) " +
+                                    "VALUES (:uid, 'active', NOW(), NOW())")
                     .bind("uid", userId)
-                    .executeAndReturnGeneratedKeys("id")
-                    .mapTo(Integer.class)
-                    .one();
-        });
-    }
-
-    public int getOrCreateCartBySessionId(String sessionId) {
-        return jdbi.withHandle(handle -> {
-            Optional<Integer> cartId = handle
-                    .createQuery("SELECT id FROM cart " +
-                            "WHERE session_id = :sid AND user_id IS NULL AND status = 'active' LIMIT 1")
-                    .bind("sid", sessionId)
-                    .mapTo(Integer.class)
-                    .findOne();
-            if (cartId.isPresent()) return cartId.get();
-
-            return handle.createUpdate(
-                            "INSERT INTO cart (user_id, session_id, status, created_at, updated_at) " +
-                                    "VALUES (NULL, :sid, 'active', NOW(), NOW())")
-                    .bind("sid", sessionId)
                     .executeAndReturnGeneratedKeys("id")
                     .mapTo(Integer.class)
                     .one();
@@ -236,117 +216,11 @@ public class CartDAO {
         });
     }
 
-
-    public void mergeCart(String sessionId, int userId) {
-        jdbi.useHandle(handle -> {
-
-            // Tim guest cart theo sessionId
-            Optional<Integer> guestCartIdOpt = handle
-                    .createQuery(
-                            "SELECT id FROM cart " +
-                                    "WHERE session_id = :sid AND user_id IS NULL AND status = 'active' LIMIT 1")
-                    .bind("sid", sessionId)
-                    .mapTo(Integer.class)
-                    .findOne();
-
-            if (guestCartIdOpt.isEmpty()) return; // Khong co guest cart, bo qua
-
-            int guestCartId = guestCartIdOpt.get();
-            int userCartId = getOrCreateCartByUserId(userId);
-
-            // Lay items tu guest cart (chi lay san pham con active)
-            List<Map<String, Object>> guestItems = handle
-                    .createQuery(
-                            "SELECT ci.comic_id, ci.quantity, " +
-                                    "       ci.price_at_purchase, ci.flash_sale_price, ci.flash_sale_id, " +
-                                    "       c.stock_quantity, COALESCE(c.damaged_quantity,0) AS damaged_quantity " +
-                                    "FROM cart_item ci " +
-                                    "JOIN comics c ON ci.comic_id = c.id " +
-                                    "WHERE ci.cart_id = :cartId " +
-                                    "  AND c.status = 'available' AND c.is_hidden = 0 AND c.is_deleted = 0")
-                    .bind("cartId", guestCartId)
-                    .mapToMap()
-                    .list();
-
-            for (Map<String, Object> item : guestItems) {
-                int comicId = ((Number) item.get("comic_id")).intValue();
-                int qty = ((Number) item.get("quantity")).intValue();
-                double priceAtPurchase = ((Number) item.get("price_at_purchase")).doubleValue();
-                int stockQty = ((Number) item.get("stock_quantity")).intValue();
-                int damagedQty = ((Number) item.get("damaged_quantity")).intValue();
-                int available = stockQty - damagedQty;
-
-                if (available <= 0) continue; // Bo qua san pham het hang
-
-                // Kiem tra flash sale con active khong
-                Double flashSalePrice = null;
-                Integer flashSaleId = null;
-                if (item.get("flash_sale_id") != null) {
-                    Integer fsId = ((Number) item.get("flash_sale_id")).intValue();
-                    Optional<Map<String, Object>> activeFs = handle
-                            .createQuery(
-                                    "SELECT id FROM flashsale " +
-                                            "WHERE id = :fsId AND status = 'active' " +
-                                            "  AND NOW() BETWEEN start_time AND end_time " +
-                                            "  AND is_deleted = 0 LIMIT 1")
-                            .bind("fsId", fsId)
-                            .mapToMap()
-                            .findOne();
-                    if (activeFs.isPresent()) {
-                        flashSaleId = fsId;
-                        flashSalePrice = item.get("flash_sale_price") != null
-                                ? ((Number) item.get("flash_sale_price")).doubleValue()
-                                : null;
-                    }
-                    // Neu flash sale het han -> de null (dung gia thuong)
-                }
-
-                handle.createUpdate(
-                                "INSERT INTO cart_item " +
-                                        "  (cart_id, comic_id, quantity, " +
-                                        "   price_at_purchase, flash_sale_price, flash_sale_id, " +
-                                        "   created_at, updated_at) " +
-                                        "VALUES " +
-                                        "  (:cartId, :comicId, LEAST(:qty, :available), " +
-                                        "   :priceAtPurchase, :flashSalePrice, :flashSaleId, " +
-                                        "   NOW(), NOW()) " +
-                                        "ON DUPLICATE KEY UPDATE " +
-                                        "  quantity   = LEAST(quantity + VALUES(quantity), :available), " +
-                                        "  updated_at = NOW()")
-                        .bind("cartId", userCartId)
-                        .bind("comicId", comicId)
-                        .bind("qty", qty)
-                        .bind("available", available)
-                        .bind("priceAtPurchase", priceAtPurchase)
-                        .bind("flashSalePrice", flashSalePrice)
-                        .bind("flashSaleId", flashSaleId)
-                        .execute();
-            }
-
-            // Xoa guest cart sau khi da merge xong
-            handle.createUpdate("DELETE FROM cart_item WHERE cart_id = :cartId")
-                    .bind("cartId", guestCartId).execute();
-            handle.createUpdate("DELETE FROM cart WHERE id = :cartId")
-                    .bind("cartId", guestCartId).execute();
-        });
-    }
-
     public Optional<Integer> findCartIdByUserId(int userId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery(
                                 "SELECT id FROM cart WHERE user_id = :uid AND status = 'active' LIMIT 1")
                         .bind("uid", userId)
-                        .mapTo(Integer.class)
-                        .findOne()
-        );
-    }
-
-    public Optional<Integer> findCartIdBySessionId(String sessionId) {
-        return jdbi.withHandle(handle ->
-                handle.createQuery(
-                                "SELECT id FROM cart " +
-                                        "WHERE session_id = :sid AND user_id IS NULL AND status = 'active' LIMIT 1")
-                        .bind("sid", sessionId)
                         .mapTo(Integer.class)
                         .findOne()
         );
@@ -542,34 +416,6 @@ public class CartDAO {
                     .execute();
 
             return orderId;
-        });
-    }
-
-
-
-    public int deleteGuestCartBySessionId(String sessionId) {
-        return jdbi.withHandle(handle -> {
-            Optional<Integer> cartIdOpt = handle
-                    .createQuery(
-                            "SELECT id FROM cart " +
-                                    "WHERE session_id = :sid " +
-                                    "  AND user_id IS NULL " +
-                                    "  AND status = 'active' LIMIT 1")
-                    .bind("sid", sessionId)
-                    .mapTo(Integer.class)
-                    .findOne();
-
-            if (cartIdOpt.isEmpty()) return 0;
-
-            int cartId = cartIdOpt.get();
-            handle.createUpdate(
-                            "DELETE FROM cart_item WHERE cart_id = :cartId")
-                    .bind("cartId", cartId)
-                    .execute();
-            return handle.createUpdate(
-                            "DELETE FROM cart WHERE id = :cartId")
-                    .bind("cartId", cartId)
-                    .execute();
         });
     }
 

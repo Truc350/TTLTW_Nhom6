@@ -56,7 +56,8 @@ public class CartDAO {
     }
 
     public int addItem(int cartId, int comicId, int quantity) {
-        return jdbi.withHandle(handle -> {
+        return jdbi.inTransaction(handle -> {
+            // LOCK row comics để tránh race condition
             Map<String, Object> comicInfo = handle
                     .createQuery(
                             "SELECT c.price, " +
@@ -73,64 +74,63 @@ public class CartDAO {
                                     "  AND c.status    = 'available' " +
                                     "  AND c.is_hidden = 0 " +
                                     "  AND c.is_deleted = 0 " +
-                                    "LIMIT 1")
+                                    "LIMIT 1 FOR UPDATE")  // THÊM FOR UPDATE
                     .bind("comicId", comicId)
                     .mapToMap()
                     .findOne()
                     .orElse(null);
-            System.out.println("[CartDAO] addItem called: cartId=" + cartId
-                    + " comicId=" + comicId + " quantity=" + quantity);
-            System.out.println("[CartDAO] comicInfo=" + comicInfo);
-            // San pham khong ton tai / bi an / bi xoa
-            if (comicInfo == null) {
-                System.out.println("[CartDAO] comicInfo NULL -> return -1");
-                return -1;
-            }
+            if (comicInfo == null) return -1;
 
-            double priceAtPurchase = ((Number) comicInfo.get("price")).doubleValue();
-            int stockQty = ((Number) comicInfo.get("stock_quantity")).intValue();
-            int damagedQty = ((Number) comicInfo.get("damaged_quantity")).intValue();
-            int available = stockQty - damagedQty;
-            System.out.println("[CartDAO] available=" + available
-                    + " price=" + priceAtPurchase);
-            // Het hang hoan toan
-            if (available <= 0) return 0;
+            double  priceAtPurchase = ((Number) comicInfo.get("price")).doubleValue();
+            int     stockQty        = ((Number) comicInfo.get("stock_quantity")).intValue();
+            int     damagedQty      = ((Number) comicInfo.get("damaged_quantity")).intValue();
+            int     available       = stockQty - damagedQty;
 
-            Integer flashSaleId = null;
-            Double flashSalePrice = null;
+            if (available <= 0) return -2; // ĐỔI: -2 = out_of_stock, tránh nhầm với ON DUPLICATE KEY
+
+            Integer flashSaleId    = null;
+            Double  flashSalePrice = null;
             if (comicInfo.get("flash_sale_id") != null) {
-                flashSaleId = ((Number) comicInfo.get("flash_sale_id")).intValue();
+                flashSaleId    = ((Number) comicInfo.get("flash_sale_id")).intValue();
                 double discount = ((Number) comicInfo.get("discount_percent")).doubleValue();
-                flashSalePrice = priceAtPurchase * (1 - discount / 100.0);
+                flashSalePrice  = priceAtPurchase * (1 - discount / 100.0);
             }
-
+            // Lấy số lượng hiện tại trong cart (nếu đã có)
+            int currentQtyInCart = handle
+                    .createQuery(
+                            "SELECT COALESCE(quantity, 0) FROM cart_item " +
+                                    "WHERE cart_id = :cartId AND comic_id = :comicId")
+                    .bind("cartId",  cartId)
+                    .bind("comicId", comicId)
+                    .mapTo(Integer.class)
+                    .findOne()
+                    .orElse(0);
+            int newQty = Math.min(currentQtyInCart + quantity, available);
+            if (newQty <= 0) return -2;
             int affected = handle.createUpdate(
                             "INSERT INTO cart_item " +
                                     "  (cart_id, comic_id, quantity, " +
                                     "   price_at_purchase, flash_sale_price, flash_sale_id, " +
                                     "   created_at, updated_at) " +
                                     "VALUES " +
-                                    "  (:cartId, :comicId, LEAST(:qty, :available), " +
+                                    "  (:cartId, :comicId, :newQty, " +
                                     "   :priceAtPurchase, :flashSalePrice, :flashSaleId, " +
                                     "   NOW(), NOW()) " +
                                     "ON DUPLICATE KEY UPDATE " +
-                                    "  quantity         = LEAST(quantity + VALUES(quantity), :available), " +
+                                    "  quantity         = :newQty, " +  // dùng newQty đã tính sẵn
                                     "  flash_sale_price = VALUES(flash_sale_price), " +
                                     "  flash_sale_id    = VALUES(flash_sale_id), " +
                                     "  updated_at       = NOW()")
-                    .bind("cartId", cartId)
-                    .bind("comicId", comicId)
-                    .bind("qty", quantity)
-                    .bind("available", available)
+                    .bind("cartId",          cartId)
+                    .bind("comicId",         comicId)
+                    .bind("newQty",          newQty)
+                    .bind("available",       available)
                     .bind("priceAtPurchase", priceAtPurchase)
-                    .bind("flashSalePrice", flashSalePrice)
-                    .bind("flashSaleId", flashSaleId)
+                    .bind("flashSalePrice",  flashSalePrice)
+                    .bind("flashSaleId",     flashSaleId)
                     .execute();
-            System.out.println("[CartDAO] INSERT affected=" + affected);
             return affected;
         });
-
-
     }
 
     public int updateQuantity(int cartId, int comicId, int newQuantity) {

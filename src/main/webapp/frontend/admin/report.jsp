@@ -24,7 +24,13 @@
                 <button class="time-btn" data-filter="custom">Tùy chỉnh</button>
                 <input type="date" id="startDate" style="display:none;">
                 <input type="date" id="endDate" style="display:none;">
+
+                <button class="export-btn" onclick="exportExcel()">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </button>
+
             </div>
+
             <div class="kpi-cards">
                 <div class="kpi-card" data-chart="revenue">
                     <i class="fas fa-dollar-sign kpi-icon"></i>
@@ -407,6 +413,24 @@
                 }
             });
         };
+
+        function exportExcel() {
+            const activeBtn = document.querySelector('.time-btn.active');
+            const filter = activeBtn ? activeBtn.getAttribute('data-filter') : 'today';
+
+            let url = contextPath + '/admin/export-excel?filter=' + filter;
+
+            if (filter === 'custom') {
+                const start = document.getElementById('startDate').value;
+                const end = document.getElementById('endDate').value;
+                if (!start || !end) {
+                    alert('Vui lòng chọn khoảng thời gian!');
+                    return;
+                }
+                url += '&startDate=' + start + '&endDate=' + end;
+            }
+            window.location.href = url;
+        }
     </script>
 </body>
 </html>

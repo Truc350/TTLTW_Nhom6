@@ -10,6 +10,7 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.service.CartService;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.service.ComicService;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.cache.CacheService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,12 +141,11 @@ public class CartServlet extends HttpServlet {
         User    currentUser = (User) session.getAttribute("currentUser");
         Integer userId      = (currentUser != null) ? currentUser.getId() : null;
         if (userId != null) {
+            cart.removeAllItems();
+            CacheService.cartCache.remove(cart.getId());
             cartService.getCart(cart, userId, null);
             session.setAttribute("cart", cart);
         }
-        CartService cartService = new CartService();
-        cartService.getCart(cart, userId, session.getId());
-        session.setAttribute("cart", cart);
         boolean hasUpdates = false;
 
         for (CartItem item : cart.getItems()) {

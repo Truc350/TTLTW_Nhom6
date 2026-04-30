@@ -11,11 +11,9 @@ import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CartDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.FlashSaleComicsDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.UserShippingAddressDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.model.User;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.model.UserShippingAddress;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.*;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.service.ComicService;
+import vn.edu.hcmuaf.fit.ttltw_nhom6.service.cache.CacheService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -235,6 +233,8 @@ public class CheckoutServlet extends HttpServlet {
             int cartId = cartDAO.getOrCreateCartByUserId(user.getId());
 
             try {
+                CacheService.cartCache.remove(cartId);
+
                 int orderId = cartDAO.checkout(
                         cartId,
                         user.getId(),
@@ -256,6 +256,10 @@ public class CheckoutServlet extends HttpServlet {
                 session.setAttribute("justOrdered",  true);
                 session.setAttribute("orderSuccess",
                         "Đặt hàng thành công! Mã đơn hàng: #" + orderId);
+
+                Cart newCart = new Cart();
+                session.setAttribute("cart", newCart);
+
                 response.sendRedirect(request.getContextPath() + "/checkout");
 
             } catch (Exception e) {

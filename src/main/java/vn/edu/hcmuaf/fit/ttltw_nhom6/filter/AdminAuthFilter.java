@@ -28,11 +28,11 @@ public class AdminAuthFilter implements Filter {
 
         // Kiểm tra có phải admin không
         User user = (User) session.getAttribute("currentUser");
-        boolean isAdmin = "comicstore365@gmail.com".equals(user.getEmail()) ||
-                "comicstore365".equals(user.getUsername());
+//        boolean isAdmin = "comicstore365@gmail.com".equals(user.getEmail()) ||
+//                "comicstore365".equals(user.getUsername());
 
         // Hoặc kiểm tra theo role:
-        // boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+         boolean isAdmin = "admin".equalsIgnoreCase(user.getRole());
 
         if (!isAdmin) {
             session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang admin.");

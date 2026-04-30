@@ -15,20 +15,20 @@ public class GuestCartSessionListener implements  HttpSessionListener{
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        HttpSession session = se.getSession();
-        User currentUser = (User) session.getAttribute("currentUser");
-        if(currentUser != null) {
-            return;
-        }
-        String sessionId = session.getId();
-        if(sessionId == null) return;
-        try {
-            CartDAO cartDAO = new CartDAO();
-            int deleted = cartDAO.deleteGuestCartBySessionId(sessionId);
-            System.out.println("[GuestCartSessionListener] Session destroyed: "
-                    + sessionId + " -> deleted " + deleted + " guest cart(s)");
-        } catch (Exception e) {
-            System.err.println("[GuestCartSessionListener] Error: " + e.getMessage());
-        }
+//        HttpSession session = se.getSession();
+//        User currentUser = (User) session.getAttribute("currentUser");
+//        if(currentUser != null) {
+//            return;
+//        }
+//        String sessionId = session.getId();
+//        if(sessionId == null) return;
+//        try {
+//            CartDAO cartDAO = new CartDAO();
+//            int deleted = cartDAO.deleteGuestCartBySessionId(sessionId);
+//            System.out.println("[GuestCartSessionListener] Session destroyed: "
+//                    + sessionId + " -> deleted " + deleted + " guest cart(s)");
+//        } catch (Exception e) {
+//            System.err.println("[GuestCartSessionListener] Error: " + e.getMessage());
+//        }
     }
 }

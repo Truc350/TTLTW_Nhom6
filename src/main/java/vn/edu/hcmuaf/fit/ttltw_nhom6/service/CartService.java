@@ -3,7 +3,6 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.service;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.dao.CartDAO;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Cart;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.model.CartItem;
-import vn.edu.hcmuaf.fit.ttltw_nhom6.model.Comic;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.service.cache.CacheService;
 
 import java.util.List;
@@ -18,26 +17,18 @@ private final CartDAO cartDAO;
     }
 
     public List<CartItem> getCart(Cart cart, Integer userId, String sessionId) {
-        Optional<Integer> cartIdOpt = resolveCartId(userId, sessionId, false);
-        if (cartIdOpt.isEmpty()) return List.of();
 
+        Optional<Integer> cartIdOpt = resolveCartId(userId, sessionId, false);
+        if (cartIdOpt.isEmpty()) {
+            cart.removeAllItems();
+            return List.of();
+        }
         int cartId = cartIdOpt.get();
         cart.setId(cartId);
-        if (CacheService.cartCache.containsKey(cartId)) {
-            System.out.println("LOAD CART FROM CACHE");
-            List<CartItem> items = CacheService.cartCache.get(cartId);
-            cart.setItems(items);
-            return items;
-        }
 
         List<CartItem> items = cartDAO.getCartItems(cartId);
-
-        if (items != null) {
-            CacheService.cartCache.put(cartId, items);
-        }
-
-        cart.setItems(items);
-        return items;
+        cart.setItems(items != null ? items : List.of());
+        return items != null ? items : List.of();
     }
 
     public String addToCart(Cart cart, Integer userId, String sessionId,
@@ -51,7 +42,6 @@ private final CartDAO cartDAO;
         System.out.println("[CartService] addItem returned: " + affected);
         if (affected ==-1) return "not_found";
         if (affected == -2) return "out_of_stock";
-        CacheService.cartCache.remove(cartId);
         refreshCart(cart, cartId);
         return "success";
     }
@@ -62,8 +52,6 @@ private final CartDAO cartDAO;
         if (cartIdOpt.isEmpty()) return "not_found";
 
         int cartId = cartIdOpt.get();
-
-        CacheService.cartCache.remove(cartId);
 
         CartItem existing = cart.get(comicId);
         if (existing == null) return "not_found";
@@ -90,7 +78,6 @@ private final CartDAO cartDAO;
         if (cartIdOpt.isEmpty()) return false;
 
         int cartId   = cartIdOpt.get();
-        CacheService.cartCache.remove(cartId);
         int affected = cartDAO.removeItem(cartId, comicId);
         if (affected > 0) {
             refreshCart(cart, cartId);
@@ -107,37 +94,21 @@ private final CartDAO cartDAO;
         cart.removeAllItems();
     }
 
-    public void mergeCart(Cart cart, int userId, String guestSessionId) {
-        cartDAO.mergeCart(guestSessionId, userId);
-        getCart(cart, userId, null);
-    }
-
     private Optional<Integer> resolveCartId(Integer userId, String sessionId,
                                             boolean createIfAbsent) {
-        if (userId != null) {
             Optional<Integer> opt = cartDAO.findCartIdByUserId(userId);
             if (opt.isPresent() || !createIfAbsent) return opt;
             return Optional.of(cartDAO.getOrCreateCartByUserId(userId));
-        } else {
-            Optional<Integer> opt = cartDAO.findCartIdBySessionId(sessionId);
-            if (opt.isPresent() || !createIfAbsent) return opt;
-            return Optional.of(cartDAO.getOrCreateCartBySessionId(sessionId));
-        }
     }
 
     private int resolveOrCreateCartId(Integer userId, String sessionId) {
-        return userId != null
-                ? cartDAO.getOrCreateCartByUserId(userId)
-                : cartDAO.getOrCreateCartBySessionId(sessionId);
+        return cartDAO.getOrCreateCartByUserId(userId);
     }
 
     private void refreshCart(Cart cart, int cartId) {
         cart.setId(cartId);
         List<CartItem> items = cartDAO.getCartItems(cartId);
-        System.out.println("[CartService] refreshCart: cartId=" + cartId
-                + " items loaded=" + items.size());
-        CacheService.cartCache.put(cartId, items);
-        cart.setItems(items);
+        cart.setItems(items != null ? items : List.of());
     }
 
     public void mergeSessionCartToDb(Cart userCart, int userId, Cart guestCart) {

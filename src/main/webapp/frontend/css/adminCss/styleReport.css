@@ -379,3 +379,28 @@ body {
 @media (max-width: 1200px) {
     .flashsale-stats-wrapper { flex-direction: column; }
 }
+
+.export-btn {
+    margin-left: 30px;
+    padding: 10px 22px;
+    background-color: #1D6F42;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.export-btn:hover {
+    background-color: #155230;
+    transform: translateY(-1px);
+}
+
+.export-btn i {
+    font-size: 16px;
+}

@@ -2,7 +2,7 @@ package vn.edu.hcmuaf.fit.ttltw_nhom6.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw_nhom6.db.JdbiConnector;
-
+import vn.edu.hcmuaf.fit.ttltw_nhom6.model.RevenueRow;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -171,6 +171,71 @@ public class ReportDAO {
                     .mapToMap()
                     .list();
             return result;
+        });
+    }
+
+    public List<RevenueRow> getRevenueData(String filter, String startDate, String endDate) {
+        LocalDate start;
+        LocalDate end = LocalDate.now();
+
+        switch (filter) {
+            case "week":
+                start = end.minusDays(6);
+                break;
+            case "month":
+                start = end.withDayOfMonth(1);
+                break;
+            case "year":
+                start = end.withDayOfYear(1);
+                break;
+            case "custom":
+                start = LocalDate.parse(startDate);
+                end   = LocalDate.parse(endDate);
+                break;
+            default:
+                start = end;
+                break;
+        }
+
+        final LocalDate finalStart = start;
+        final LocalDate finalEnd   = end;
+
+        return jdbi.withHandle(handle -> {
+            String groupExpr, labelExpr;
+            if ("year".equals(filter)) {
+                groupExpr = "MONTH(order_date)";
+                labelExpr = "CONCAT('Tháng ', MONTH(order_date))";
+            } else if ("month".equals(filter) || "custom".equals(filter)) {
+                groupExpr = "DATE(order_date)";
+                labelExpr = "DATE_FORMAT(order_date, '%d/%m')";
+            } else {
+                groupExpr = "DATE(order_date)";
+                labelExpr = "DATE_FORMAT(order_date, '%d/%m')";
+            }
+
+            String sql =
+                    "SELECT " + labelExpr + " AS label, " +
+                            "  COALESCE(SUM(total_amount), 0) AS revenue, " +
+                            "  COUNT(*) AS total_orders, " +
+                            "  COALESCE(SUM(total_amount) / COUNT(*), 0) AS avg_value " +
+                            "FROM orders " +
+                            "WHERE order_date IS NOT NULL " +
+                            "  AND DATE(order_date) BETWEEN :start AND :end " +
+                            "GROUP BY " + groupExpr + " " +
+                            "ORDER BY " + groupExpr + " ASC";
+
+            return handle.createQuery(sql)
+                    .bind("start", finalStart)
+                    .bind("end",   finalEnd)
+                    .map((rs, ctx) -> {
+                        RevenueRow row = new RevenueRow();
+                        row.setLabel(rs.getString("label"));
+                        row.setRevenue(rs.getDouble("revenue"));
+                        row.setTotalOrders(rs.getInt("total_orders"));
+                        row.setAvgValue(rs.getDouble("avg_value"));
+                        return row;
+                    })
+                    .list();
         });
     }
 }

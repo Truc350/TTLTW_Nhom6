@@ -720,10 +720,10 @@
             text-align: center;
         ">
             <h2 style="color: #dc3545; font-size: 22px; margin-bottom: 10px;">
-                Sản phẩm hiện không đủ số lượng theo đơn của bạn
+                Sản phẩm hiện không đủ số lượng theo đơn của bạn hoặc sản phẩm đã hư hỏng
             </h2>
             <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
-                ${message}
+                    ${message}
             </p>
             <button onclick="this.closest('div').parentElement.remove()"
                 style="

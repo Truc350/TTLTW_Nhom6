@@ -118,4 +118,53 @@ public class VoucherDao {
                         .list()
         );
     }
+
+    public List<Voucher> getExpiringSoon() {
+        String sql = " SELECT * FROM vouchers WHERE end_date > NOW() AND quantity > used_count ORDER BY end_date ASC";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(Voucher.class)
+                        .list()
+        );
+    }
+    public List<Voucher> sortByStatus() {
+        String sql = """
+        SELECT * FROM vouchers
+        ORDER BY 
+            CASE 
+                WHEN end_date < NOW() THEN 2
+                WHEN used_count >= quantity THEN 1
+                ELSE 0
+            END ASC,
+            end_date ASC
+    """;
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(Voucher.class)
+                        .list()
+        );
+    }
+    public List<Voucher> getAllSorted(String sortBy, String order) {
+
+        String sortColumn = switch (sortBy) {
+            case "start_date" -> "start_date";
+            case "end_date" -> "end_date";
+            case "discount_value" -> "discount_value";
+            case "quantity" -> "quantity";
+            case "used_count" -> "used_count";
+            default -> "id";
+        };
+
+        String sortOrder = "asc".equalsIgnoreCase(order) ? "ASC" : "DESC";
+
+        String sql = "SELECT * FROM vouchers ORDER BY " + sortColumn + " " + sortOrder;
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapToBean(Voucher.class)
+                        .list()
+        );
+    }
 }

@@ -23,21 +23,18 @@ public class SortVoucherServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String sortBy = request.getParameter("sortBy");
-        String order = request.getParameter("order");
+       String status = request.getParameter("statusFilter");
+       System.out.println(status);
+        List<Voucher> allVouchers = switch (status) {
+            case "out" -> voucherDao.getOutVouchers();
+            case "running" -> voucherDao.getRunningVouchers();
+            case "expired" -> voucherDao.getExpredVouchers();
+            case null, default -> voucherDao.getAllVouchers();
+        };
 
-        List<Voucher> list;
 
-        if ("status".equals(sortBy)) {
-            list = voucherDao.sortByStatus();
-        } else if ("expiring".equals(sortBy)) {
-            list = voucherDao.getExpiringSoon();
-        } else {
-            list = voucherDao.getAllSorted(sortBy, order);
-        }
-
-        request.setAttribute("allVouchers", list);
-        request.getRequestDispatcher("/frontend/admin/Promotion.jsp")
+        request.setAttribute("allVouchers", allVouchers);
+        request.getRequestDispatcher("/frontend/admin/promotion.jsp")
                 .forward(request, response);
     }
 }

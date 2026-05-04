@@ -27,12 +27,14 @@
                 <button class="btn-add" id="openAddPopup">
                     <i class="fas fa-plus"></i> Thêm mã
                 </button>
-                <select id="statusFilter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="running">Đang chạy</option>
-                    <option value="expired">Hết hạn</option>
-                    <option value="out">Hết lượt</option>
-                </select>
+                <form action="${pageContext.request.contextPath}/admin/sortVoucher" method="GET">
+                    <select id="statusFilter" name = "statusFilter" onchange="this.form.submit()">
+                        <option value="all-status" >Tất cả trạng thái</option>
+                        <option value="running" ${param.statusFilter == "running"? 'selected' :""}>Đang chạy</option>
+                        <option value="expired" ${param.statusFilter == "expired"? 'selected' :""}>Hết hạn</option>
+                        <option value="out" ${param.statusFilter == "out"? 'selected' :""}>Hết lượt</option>
+                    </select>
+                </form>
             </div>
             <table class="promo-table">
                 <thead>

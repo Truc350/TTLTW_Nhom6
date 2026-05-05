@@ -140,4 +140,15 @@ public class VoucherDao {
                         .mapToBean(Voucher.class)
                         .list());
     }
+
+    public List<Voucher> searchVoucherById(String id){
+        String sql = "SELECT * FROM vouchers WHERE CAST(code AS CHAR) LIKE :id";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("id", "%" + id + "%")
+                        .mapToBean(Voucher.class)
+                        .list()
+        );
+    }
 }

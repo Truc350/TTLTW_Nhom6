@@ -20,10 +20,14 @@
         <%@ include file="HeaderAdmin.jsp" %>
         <div class="promotion-page">
             <div class="promo-top">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm mã...">
-                    <i class="fas fa-magnifying-glass"></i>
-                </div>
+                <form action="${pageContext.request.contextPath}/admin/search-voucher" method="get">
+                    <div class="search-box">
+                        <input type ="text" name ="idVoucher" value ="${size_voucher <= 0? '' : idVoucher}" placeholder="Tìm kiếm theo mã">
+                        <button type="submit">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
                 <button class="btn-add" id="openAddPopup">
                     <i class="fas fa-plus"></i> Thêm mã
                 </button>
